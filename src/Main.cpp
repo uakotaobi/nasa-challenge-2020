@@ -1,5 +1,6 @@
 #include <iostream>
 #include "SDL.h"
+#include "button_view.h"
 
 int main() {
   	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -40,6 +41,17 @@ int main() {
             done = true;
         }
       }
+      SDL_Rect r;
+      r.y = 25;
+      r.h = 50;
+      r.x = 25;
+      r.w = 50;
+      SDL_Color c;
+      c.r = 128;
+      c.g = 245;
+      c.b = 135;
+      ButtonView button = ButtonView(r, "uche", c);
+      button.draw(surf);
       SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
 
       if (texture == NULL) {
