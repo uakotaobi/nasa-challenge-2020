@@ -1,8 +1,13 @@
 #include <iostream>
 #include "SDL.h"
 #include "button_view.h"
+#include "SDL_ttf.h"
 
 int main() {
+    if (TTF_Init() == -1) {
+          printf("TTF_Init: %s\n", TTF_GetError());
+          return 2;
+    }
   	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
           SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
           return 1;
@@ -25,7 +30,7 @@ int main() {
     surf = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_RGBA32);
     if (surf == NULL) {
         SDL_Log("SDL_CreateRGBSurfaceWithFormat() failed: %s", SDL_GetError());
-        exit(1);
+        return 1;
     }
 
     // Fill the surface with red.
@@ -41,16 +46,7 @@ int main() {
             done = true;
         }
       }
-      SDL_Rect r;
-      r.y = 25;
-      r.h = 50;
-      r.x = 25;
-      r.w = 50;
-      SDL_Color c;
-      c.r = 128;
-      c.g = 245;
-      c.b = 135;
-      ButtonView button = ButtonView(r, "uche", c);
+      ButtonView button = ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2, 150, 75}, "Quit", SDL_Color{128, 245, 135});
       button.draw(surf);
       SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
 
@@ -70,6 +66,7 @@ int main() {
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
 
 

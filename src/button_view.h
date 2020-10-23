@@ -15,6 +15,7 @@ class ButtonView : View {
         SDL_Rect buttonBoundary_;
         std::string buttonText_;
         SDL_Color buttonColor_;
+        SDL_Color borderColor_;
 };
 
 #endif // BUTTON_VIEW_H_INCLUDED

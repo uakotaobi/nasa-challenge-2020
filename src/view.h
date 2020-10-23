@@ -8,7 +8,7 @@ public:
     virtual ~View();
     virtual void draw(SDL_Surface* screen) = 0;
     virtual SDL_Rect boundary() const = 0;
-    
+
 };
 
 #endif // VIEW_H_INCLUDED
