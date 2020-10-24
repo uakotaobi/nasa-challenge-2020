@@ -48,6 +48,8 @@ int main() {
       }
       ButtonView button = ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2, 150, 75}, "Quit", SDL_Color{128, 245, 135});
       button.draw(surf);
+      ButtonView startButton = ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2 - 200, 150, 75}, "Start", SDL_Color{128, 245, 135});
+      startButton.draw(surf);
       SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
 
       if (texture == NULL) {

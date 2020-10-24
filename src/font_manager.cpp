@@ -1,14 +1,15 @@
 #include "font_manager.h"
 #include <stdexcept>
 
+// Font manager constructor
 FontManager::FontManager() {
-      TTF_Font* font = TTF_OpenFont("fonts/Gidole-Regular.ttf", 16);
+      TTF_Font* font = TTF_OpenFont("../fonts/Gidole-Regular.ttf", 48);
       if (!font) {
           printf("TTF_OpenFont: %s\n", TTF_GetError());
       }
       fontRegistry["gidole"] = font;
 
-      font = TTF_OpenFont("fonts/Gidolinya-Regular.otf", 16);
+      font = TTF_OpenFont("../fonts/Gidolinya-Regular.otf", 48);
       if (!font) {
           printf("TTF_OpenFont: %s\n", TTF_GetError());
       }
@@ -20,8 +21,8 @@ const FontManager& getFontManager() {
       return f;
 }
 
-const TTF_Font* FontManager::getFont(std::string fontName) const {
-      if (fontRegistry.find(fontName) != fontRegistry.end()) {
+TTF_Font* FontManager::getFont(std::string fontName) const {
+      if (fontRegistry.find(fontName) == fontRegistry.end()) {
           throw std::runtime_error("Could not find " + fontName);
       }
       return fontRegistry.find(fontName)->second;

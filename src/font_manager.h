@@ -8,13 +8,13 @@
 class FontManager {
     private:
         FontManager();
-        std::map<std::string, const TTF_Font*> fontRegistry;
+        std::map<std::string, TTF_Font*> fontRegistry;
     public:
         friend const FontManager& getFontManager();
-        const TTF_Font* getFont(std::string fontName) const;
+        TTF_Font* getFont(std::string fontName) const;
 };
 
-
+extern const FontManager& getFontManager();
 
 
 
