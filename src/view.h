@@ -5,10 +5,11 @@
 
 class View {
 public:
-    virtual ~View();
     virtual void draw(SDL_Surface* screen) = 0;
     virtual SDL_Rect boundary() const = 0;
-
+public:
+    // Non-virtual functions.
+    bool mouseOver() const;
 };
 
 #endif // VIEW_H_INCLUDED

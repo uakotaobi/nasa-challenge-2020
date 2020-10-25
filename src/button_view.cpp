@@ -22,10 +22,13 @@ SDL_Rect ButtonView::boundary() const {
 
 void ButtonView::draw(SDL_Surface* screen) {
     SDL_Rect innerButtonBoundary = {buttonBoundary_.x+5, buttonBoundary_.y+5, buttonBoundary_.w-10, buttonBoundary_.h-10};
+
     // Draw the border.
     SDL_FillRect(screen, &buttonBoundary_, SDL_MapRGB(screen->format, borderColor_.r, borderColor_.g, borderColor_.b));
+
     // Draw the button background.
     SDL_FillRect(screen, &innerButtonBoundary, SDL_MapRGB(screen->format, buttonColor_.r, buttonColor_.g, buttonColor_.b));
+
     // Draw the button text.
     SDL_Rect rec = SDL_Rect{
       buttonBoundary_.x + buttonBoundary_.w / 2 - renderText->w / 2 ,
@@ -37,4 +40,9 @@ void ButtonView::draw(SDL_Surface* screen) {
                     nullptr,
                     screen,
                     &rec);
+
+    SDL_FillRect(screen, &buttonBoundary_, SDL_MapRGB(screen->format, borderColor_.r, borderColor_.g, borderColor_.b));
+    if (mouseOver()) {
+
+    }
 }
