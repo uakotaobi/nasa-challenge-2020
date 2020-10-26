@@ -13,6 +13,10 @@ MenuView::MenuView(SDL_Surface* surf, bool& done)
                             })) {}
 
 void MenuView::draw(SDL_Surface* screen) {
+    // Draw HEROIC background image
+    
+
+    // Draw the buttons
     startButton.draw(screen);
     quitButton.draw(screen);
 }

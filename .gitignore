@@ -33,3 +33,6 @@
 
 # Temporary build artifacts
 build/
+
+# Mac OS Ignores
+.DS_Store

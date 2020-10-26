@@ -34,9 +34,6 @@ int main() {
     return 1;
   }
 
-  // Fill the surface with red.
-  SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, 255, 0, 0));
-
   bool done = false;
 
   // Create views that user will see
