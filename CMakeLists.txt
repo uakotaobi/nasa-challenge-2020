@@ -8,6 +8,6 @@ FIND_PACKAGE(SDL2_ttf REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS})
 
-ADD_EXECUTABLE(altitution-bin src/main.cpp src/view.cpp src/button_view.cpp src/font_manager.cpp)
+ADD_EXECUTABLE(altitution-bin src/main.cpp src/view.cpp src/button_view.cpp src/font_manager.cpp src/menu_view.cpp)
 
 TARGET_LINK_LIBRARIES(altitution-bin ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES})
