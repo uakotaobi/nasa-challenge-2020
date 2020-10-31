@@ -51,6 +51,14 @@ int main() {
                 if (event.button.clicks == 1) {
                     menuView.handleClicks(event.button);
                 }
+				break;
+			case SDL_WINDOWEVENT:
+				// Window is resized.
+				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+					int newWidth = event.window.data1;
+					int newHeight = event.window.data2;
+				}
+				break;
 
         }
     }
