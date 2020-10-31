@@ -1,5 +1,5 @@
 #include "button_view.h"
-#include "font_manager.h"
+#include "asset_manager.h"
 #include "SDL.h"
 
 ButtonView::ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback) {
@@ -10,8 +10,8 @@ ButtonView::ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Colo
     callback_ = callback;
     deltaX = 0;
     deltaY = 0;
-    const FontManager& fm = getFontManager();
-    TTF_Font* buttonFont = fm.getFont("gidole");
+    const AssetManager& am = getAssetManager();
+    TTF_Font* buttonFont = am.getFont("gidole");
     renderText = TTF_RenderUTF8_Shaded(buttonFont, buttonText.c_str(), SDL_Color{0, 0, 0, 255}, buttonColor_);
 
 };

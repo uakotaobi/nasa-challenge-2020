@@ -1,4 +1,6 @@
 #include "menu_view.h"
+#include "asset_manager.h"
+
 
 MenuView::MenuView(SDL_Surface* surf, bool& done)
     : startButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2 - 100, 150, 75},
@@ -12,10 +14,16 @@ MenuView::MenuView(SDL_Surface* surf, bool& done)
                                 done = true;
                             })) {}
 
+
 void MenuView::draw(SDL_Surface* screen) {
     // Draw HEROIC background image
-
-
+    const AssetManager& am = getAssetManager();
+    SDL_Surface* heroicImage = am.getImage("Apollo_15_flag,_rover,_LM,_Irwin.jpg");
+    float aspectRatio = heroicImage->w / heroicImage->h;
+    SDL_Rect blitDestinationRect = SDL_Rect{0, 0, screen->w, int(screen->w/aspectRatio)};
+    blitDestinationRect.x = screen->w / 2 - blitDestinationRect.w / 2;
+    blitDestinationRect.y = screen->h / 2 - blitDestinationRect.h / 2;
+    SDL_BlitScaled(heroicImage, nullptr, screen, &blitDestinationRect);
     // Draw the buttons
     startButton.draw(screen);
     quitButton.draw(screen);

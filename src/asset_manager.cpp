@@ -1,8 +1,9 @@
-#include "font_manager.h"
+#include "asset_manager.h"
 #include <stdexcept>
+#include "SDL_image.h"
 
 // Font manager constructor
-FontManager::FontManager() {
+AssetManager::AssetManager() {
       TTF_Font* font = TTF_OpenFont("../fonts/Gidole-Regular.ttf", 48);
       if (!font) {
           printf("TTF_OpenFont: %s\n", TTF_GetError());
@@ -16,14 +17,23 @@ FontManager::FontManager() {
       fontRegistry["gidolinya"] = font;
 }
 
-const FontManager& getFontManager() {
-      static FontManager f;
+const AssetManager& getAssetManager() {
+      static AssetManager f;
       return f;
 }
 
-TTF_Font* FontManager::getFont(std::string fontName) const {
+TTF_Font* AssetManager::getFont(std::string fontName) const {
       if (fontRegistry.find(fontName) == fontRegistry.end()) {
           throw std::runtime_error("Could not find " + fontName);
       }
       return fontRegistry.find(fontName)->second;
+}
+
+SDL_Surface* AssetManager::getImage(std::string imageFileName) const {
+      std::string imagePath = "../images/" + imageFileName;
+      SDL_Surface* image = IMG_Load(imagePath.c_str());
+      if (!image) {
+          throw std::runtime_error(IMG_GetError());
+      }
+      return image;
 }
