@@ -11,7 +11,7 @@ class MenuView : public View {
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
         void handleClicks(SDL_MouseButtonEvent& mouseButtonEvent);
-		void handleResize(SDL_Surface* newSurface);
+        void handleResize(SDL_Surface* newSurface);
 
     private:
         ButtonView startButton;

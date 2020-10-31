@@ -58,6 +58,7 @@ int main() {
 					int newWidth = event.window.data1;
 					int newHeight = event.window.data2;
 					surf = SDL_CreateRGBSurfaceWithFormat(0, newWidth, newHeight, 32, SDL_PIXELFORMAT_RGBA32);
+          menuView.handleResize(surf);
 				}
 				break;
 

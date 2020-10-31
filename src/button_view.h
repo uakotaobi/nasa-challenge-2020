@@ -13,7 +13,7 @@ class ButtonView : public View {
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
         void handleClicks(SDL_MouseButtonEvent& mouseButtonEvent);
-		void handleResize(SDL_Surface* newSurface);
+        void handleResize(SDL_Surface* newSurface);
     private:
         SDL_Rect buttonBoundary_;
         std::string buttonText_;
@@ -21,6 +21,8 @@ class ButtonView : public View {
         SDL_Color borderColor_;
         SDL_Surface* renderText;
         std::function<void()> callback_;
+        int deltaX;
+        int deltaY;
 };
 
 #endif // BUTTON_VIEW_H_INCLUDED
