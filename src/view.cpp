@@ -12,3 +12,6 @@ bool View::mouseOver() const {
 void View::handleClicks(SDL_MouseButtonEvent& mouseButtonEvent) {
 
 }
+void View::handleResize(SDL_Surface* newSurface) {
+	
+}

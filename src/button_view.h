@@ -13,6 +13,7 @@ class ButtonView : public View {
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
         void handleClicks(SDL_MouseButtonEvent& mouseButtonEvent);
+		void handleResize(SDL_Surface* newSurface);
     private:
         SDL_Rect buttonBoundary_;
         std::string buttonText_;

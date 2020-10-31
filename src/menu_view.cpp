@@ -32,3 +32,8 @@ void MenuView::handleClicks(SDL_MouseButtonEvent& mouseButtonEvent) {
         quitButton.handleClicks(mouseButtonEvent);
     }
 }
+
+void MenuView::handleResize(SDL_Surface* newSurface) {
+	startButton.handleResize(newSurface);
+	quitButton.handleResize(newSurface);
+}
