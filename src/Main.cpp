@@ -48,6 +48,7 @@ int main() {
 
   // Create views that user will see
   MenuView menuView(surf, done);
+  menuView.handleResize(surf);
 
   while(!done) {
     SDL_Event event;

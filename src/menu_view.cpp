@@ -3,16 +3,16 @@
 
 
 MenuView::MenuView(SDL_Surface* surf, bool& done)
-    : startButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2 - 100, 150, 75},
+    : startButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2, 150, 75},
                              "Start",
                              SDL_Color{112, 191, 255},
-                             [] () {})),
-      quitButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2 + 100, 150, 75},
+                             [] () {},
+                             -75, -100)),
+      quitButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2, 150, 75},
                             "Quit",
                             SDL_Color{112, 191, 255},
-                            [&done] () {
-                                done = true;
-                            })) {}
+                            [&done] () {done = true;},
+                            -75, 100)) {}
 
 
 void MenuView::draw(SDL_Surface* screen) {

@@ -2,14 +2,14 @@
 #include "asset_manager.h"
 #include "SDL.h"
 
-ButtonView::ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback) {
+ButtonView::ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback, int deltaX, int deltaY) {
     buttonBoundary_ = buttonBoundary;
     buttonText_ = buttonText;
     buttonColor_ = buttonColor;
     borderColor_ = SDL_Color{55, 128, 189};
     callback_ = callback;
-    deltaX = 0;
-    deltaY = 0;
+    this->deltaX = deltaX;
+    this->deltaY = deltaY;
     const AssetManager& am = getAssetManager();
     TTF_Font* buttonFont = am.getFont("gidole");
     renderText = TTF_RenderUTF8_Shaded(buttonFont, buttonText.c_str(), SDL_Color{0, 0, 0, 255}, buttonColor_);
@@ -25,10 +25,6 @@ SDL_Rect ButtonView::boundary() const {
 }
 
 void ButtonView::draw(SDL_Surface* screen) {
-
-    // Remember displacement of this button from center of surface.
-    deltaX = buttonBoundary_.x - screen->w / 2;
-    deltaY = buttonBoundary_.y - screen->h / 2;
 
     SDL_Rect innerButtonBoundary = {buttonBoundary_.x+5, buttonBoundary_.y+5, buttonBoundary_.w-10, buttonBoundary_.h-10};
 

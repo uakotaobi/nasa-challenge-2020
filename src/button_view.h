@@ -8,7 +8,7 @@
 
 class ButtonView : public View {
     public:
-        ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback);
+        ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback, int deltaX = 0, int deltaY = 0);
         ~ButtonView();
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
