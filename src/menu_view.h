@@ -8,6 +8,7 @@
 class MenuView : public View {
     public:
         MenuView(SDL_Surface* surf, int& currentView);
+        ~MenuView();
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
         void handleClicks(SDL_MouseButtonEvent& mouseButtonEvent);
@@ -16,6 +17,7 @@ class MenuView : public View {
     private:
         ButtonView startButton;
         ButtonView quitButton;
+        SDL_Surface* heroicImage;
 };
 
 

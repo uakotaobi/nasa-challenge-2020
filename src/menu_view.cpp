@@ -12,19 +12,25 @@ MenuView::MenuView(SDL_Surface* surf, int& currentView)
                             "Quit",
                             SDL_Color{112, 191, 255},
                             [&currentView] () {currentView = -1;},
-                            -75, 100)) {}
+                            -75, 100)),
+      heroicImage(nullptr) {
+      const AssetManager& am = getAssetManager();
+      heroicImage = am.getImage("Apollo_15_flag,_rover,_LM,_Irwin.jpg");
+}
 
+MenuView::~MenuView() {
+      if (heroicImage) {
+          SDL_FreeSurface(heroicImage);
+      }
+}
 
 void MenuView::draw(SDL_Surface* screen) {
     // Draw HEROIC background image
-    const AssetManager& am = getAssetManager();
-    SDL_Surface* heroicImage = am.getImage("Apollo_15_flag,_rover,_LM,_Irwin.jpg");
     float aspectRatio = heroicImage->w / heroicImage->h;
     SDL_Rect blitDestinationRect = SDL_Rect{0, 0, screen->w, int(screen->w/aspectRatio)};
     blitDestinationRect.x = screen->w / 2 - blitDestinationRect.w / 2;
     blitDestinationRect.y = screen->h / 2 - blitDestinationRect.h / 2;
     SDL_BlitScaled(heroicImage, nullptr, screen, &blitDestinationRect);
-	SDL_FreeSurface(heroicImage);
 
     // Draw the buttons
     startButton.draw(screen);
