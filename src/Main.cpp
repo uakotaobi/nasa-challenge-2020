@@ -4,6 +4,7 @@
 #include "SDL_ttf.h"
 #include "menu_view.h"
 #include "SDL_image.h"
+#include "main_view.h"
 
 int main() {
   if (TTF_Init() == -1) {
@@ -47,16 +48,17 @@ int main() {
   bool done = false;
 
   // Create views that user will see
-  MenuView menuView(surf, done);
-  menuView.handleResize(surf);
+  int currentView = 0;
+  MenuView menuView(surf, currentView);
+  MainView mainView(surf);
 
-  while(!done) {
+  while (currentView >= 0) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
                 // Window was closed
-                done = true;
+                currentView = -1;
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 if (event.button.clicks == 1) {
@@ -75,7 +77,13 @@ int main() {
 
         }
     }
-    menuView.draw(surf);
+
+    if (currentView == 0) {
+        menuView.draw(surf);
+    } else if (currentView == 1) {
+        mainView.draw(surf);
+    }
+
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
 
     if (texture == NULL) {

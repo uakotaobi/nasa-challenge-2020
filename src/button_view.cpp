@@ -21,19 +21,28 @@ ButtonView::~ButtonView() {
 }
 
 SDL_Rect ButtonView::boundary() const {
-    return buttonBoundary_;
+    return SDL_Rect {
+      buttonBoundary_.x + deltaX,
+      buttonBoundary_.y + deltaY,
+      buttonBoundary_.w,
+      buttonBoundary_.h
+    };
 }
 
 void ButtonView::draw(SDL_Surface* screen) {
 
-    SDL_Rect innerButtonBoundary = {buttonBoundary_.x+5, buttonBoundary_.y+5, buttonBoundary_.w-10, buttonBoundary_.h-10};
+    SDL_Rect buttonBoundary = buttonBoundary_;
+    buttonBoundary.x = screen->w / 2 + deltaX;
+    buttonBoundary.y = screen->h / 2 + deltaY;
+
+    SDL_Rect innerButtonBoundary = {buttonBoundary.x+5, buttonBoundary.y+5, buttonBoundary.w-10, buttonBoundary.h-10};
 
     // Draw the border.
-    SDL_FillRect(screen, &buttonBoundary_, SDL_MapRGB(screen->format, borderColor_.r, borderColor_.g, borderColor_.b));
+    SDL_FillRect(screen, &buttonBoundary, SDL_MapRGB(screen->format, borderColor_.r, borderColor_.g, borderColor_.b));
 
     // Change color when mouseover.
     if (mouseOver()) {
-        SDL_FillRect(screen, &buttonBoundary_, SDL_MapRGB(screen->format, 255, 255, 255));
+        SDL_FillRect(screen, &buttonBoundary, SDL_MapRGB(screen->format, 255, 255, 255));
     }
 
     // Draw the button background.
@@ -41,8 +50,8 @@ void ButtonView::draw(SDL_Surface* screen) {
 
     // Draw the button text.
     SDL_Rect rec = SDL_Rect{
-      buttonBoundary_.x + buttonBoundary_.w / 2 - renderText->w / 2 ,
-      buttonBoundary_.y + buttonBoundary_.h / 2 - renderText->h / 2,
+      buttonBoundary.x + buttonBoundary.w / 2 - renderText->w / 2 ,
+      buttonBoundary.y + buttonBoundary.h / 2 - renderText->h / 2,
       0 /* ignored */,
       0 /* ignored */
     };
@@ -58,6 +67,4 @@ void ButtonView::handleClicks(SDL_MouseButtonEvent& mouseButtonEvent) {
 
 
 void ButtonView::handleResize(SDL_Surface* newSurface) {
-    buttonBoundary_.x = newSurface->w / 2 + deltaX;
-    buttonBoundary_.y = newSurface->h / 2 + deltaY;
 }

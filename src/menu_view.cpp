@@ -2,16 +2,16 @@
 #include "asset_manager.h"
 
 
-MenuView::MenuView(SDL_Surface* surf, bool& done)
+MenuView::MenuView(SDL_Surface* surf, int& currentView)
     : startButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2, 150, 75},
                              "Start",
                              SDL_Color{112, 191, 255},
-                             [] () {},
+                             [&currentView] () {currentView = 1;},
                              -75, -100)),
       quitButton (ButtonView(SDL_Rect{(surf->w-150)/2, (surf->h-75)/2, 150, 75},
                             "Quit",
                             SDL_Color{112, 191, 255},
-                            [&done] () {done = true;},
+                            [&currentView] () {currentView = -1;},
                             -75, 100)) {}
 
 
@@ -25,7 +25,7 @@ void MenuView::draw(SDL_Surface* screen) {
     blitDestinationRect.y = screen->h / 2 - blitDestinationRect.h / 2;
     SDL_BlitScaled(heroicImage, nullptr, screen, &blitDestinationRect);
 	SDL_FreeSurface(heroicImage);
-	
+
     // Draw the buttons
     startButton.draw(screen);
     quitButton.draw(screen);

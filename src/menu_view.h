@@ -7,7 +7,7 @@
 
 class MenuView : public View {
     public:
-        MenuView(SDL_Surface* surf, bool& done);
+        MenuView(SDL_Surface* surf, int& currentView);
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
         void handleClicks(SDL_MouseButtonEvent& mouseButtonEvent);
