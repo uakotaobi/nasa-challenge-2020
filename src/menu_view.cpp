@@ -24,6 +24,8 @@ void MenuView::draw(SDL_Surface* screen) {
     blitDestinationRect.x = screen->w / 2 - blitDestinationRect.w / 2;
     blitDestinationRect.y = screen->h / 2 - blitDestinationRect.h / 2;
     SDL_BlitScaled(heroicImage, nullptr, screen, &blitDestinationRect);
+	SDL_FreeSurface(heroicImage);
+	
     // Draw the buttons
     startButton.draw(screen);
     quitButton.draw(screen);
