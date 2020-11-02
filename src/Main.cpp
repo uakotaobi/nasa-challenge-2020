@@ -27,9 +27,7 @@ int main() {
     }
 
     const int width = 1800;
-
     const int height = 1050;
-
     SDL_Window *window;
     SDL_Renderer *renderer;
 
@@ -62,7 +60,7 @@ int main() {
                     currentView = -1;
                     break;
                 case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE)                     {
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
                         if (currentView == 1) {
                             // Break out of main view.
                             currentView = 0;
