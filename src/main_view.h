@@ -2,6 +2,7 @@
 #define MAIN_VIEW_H_INCLUDED
 
 #include "view.h"
+#include "moon_view.h"
 
 class MainView : public View {
     public:
@@ -11,6 +12,7 @@ class MainView : public View {
         void handleResize(SDL_Surface* screen);
     private:
         SDL_Rect boundaryMainView;
+        MoonView moonView;
 };
 
 #endif // MAIN_VIEW_H_INCLUDED
