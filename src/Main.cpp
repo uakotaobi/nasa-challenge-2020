@@ -26,8 +26,8 @@ int main() {
         return 1;
     }
 
-    const int width = 1800;
-    const int height = 1050;
+    const int width = 1200;
+    const int height = 700;
     SDL_Window *window;
     SDL_Renderer *renderer;
 

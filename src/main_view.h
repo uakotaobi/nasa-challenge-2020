@@ -4,6 +4,7 @@
 #include "view.h"
 #include "moon_view.h"
 #include "info_view.h"
+#include "nav_view.h"
 
 class MainView : public View {
     public:
@@ -15,6 +16,7 @@ class MainView : public View {
         SDL_Rect boundaryMainView;
         MoonView moonView;
         InfoView infoView;
+		NavView navView;
 };
 
 #endif // MAIN_VIEW_H_INCLUDED
