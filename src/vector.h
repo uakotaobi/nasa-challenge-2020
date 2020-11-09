@@ -1,15 +1,24 @@
 #ifndef VECTOR_H_INCLUDED
-#define VECTOR_H_INCLUDED 
+#define VECTOR_H_INCLUDED
+
+#include "point.h"
 
 struct Vector {
 	double x;
 	double y;
 	double z;
-	
+
 	Vector();
 	Vector(double x_, double y_, double z_);
-	
+
 	double magnitude() const;
+    friend Point operator+(Point p, Vector v);
+    friend Point operator+(Vector v, Point p);
+    friend Vector operator*(Vector v, double f);
+    friend Vector operator*(double f, Vector v);
+    friend Vector operator/(Vector v, double f);
+    friend double dotProduct(Vector v1, Vector v2);
+    friend Vector normalize(Vector v);
 };
-	
+
 #endif
