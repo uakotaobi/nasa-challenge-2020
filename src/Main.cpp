@@ -5,12 +5,28 @@
 #include "menu_view.h"
 #include "SDL_image.h"
 #include "main_view.h"
+#include "vector.h"
+
+void debugPrint() {
+    Vector i(1, 0, 0);
+    Vector j(0, 1, 0);
+    Vector k(0, 0, 1);
+
+    Vector a(1, 1, 0);
+    Vector b(0, 1, 0);
+
+    std::cout << a << " x " << b << " == " << crossProduct(a, b) << "\n";
+}
 
 int main() {
+    debugPrint();
+    return 0;
+
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
         return 2;
     }
+
 
     // load support for the JPG and PNG image formats
     int flags = IMG_INIT_JPG | IMG_INIT_PNG;

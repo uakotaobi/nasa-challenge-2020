@@ -2,6 +2,7 @@
 #define VECTOR_H_INCLUDED
 
 #include "point.h"
+#include <ostream>
 
 struct Vector {
 	double x;
@@ -17,7 +18,9 @@ struct Vector {
     friend Vector operator*(Vector v, double f);
     friend Vector operator*(double f, Vector v);
     friend Vector operator/(Vector v, double f);
+    friend std::ostream& operator<<(std::ostream&, Vector v);
     friend double dotProduct(Vector v1, Vector v2);
+    friend Vector crossProduct(Vector v1, Vector v2);
     friend Vector normalize(Vector v);
 };
 

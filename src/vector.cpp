@@ -32,9 +32,26 @@ Vector operator/(Vector v, double f) {
     return Vector(v.x/f, v.y/f, v.z/f);
 }
 
+std::ostream& operator<<(std::ostream& s, Vector v) {
+    s << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+    return s;
+}
+
 double dotProduct(Vector v1, Vector v2) {
     return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
+
+// Understand the wizardry at work: https://www.mathsisfun.com/algebra/vectors-cross-product.html
+Vector crossProduct(Vector v1, Vector v2) {
+    // Cross product formula finds a vector perpendicular to the other 2 vectors
+    // cx = aybz − azby
+    // cy = azbx − axbz
+    // cz = axby − aybx
+    return Vector(v1.y*v2.z - v1.z*v2.y,
+                  v1.z*v2.x - v1.x*v2.z,
+                  v1.x*v2.y - v1.y*v2.x);
+}
+
 
 Vector normalize (Vector v) {
     if (v.magnitude()<-epsilon || v.magnitude()>epsilon){
