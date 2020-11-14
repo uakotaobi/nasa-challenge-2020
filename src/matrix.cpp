@@ -4,6 +4,8 @@ Matrix::Matrix() {
 
 }
 
+
+
 Matrix::Matrix(double a11, double a12, double a13, double a14,
                double a21, double a22, double a23, double a24,
                double a31, double a32, double a33, double a34,
@@ -15,4 +17,20 @@ Matrix::Matrix(double a11, double a12, double a13, double a14,
         a41, a42, a43, a44
     };
     
+}
+
+Matrix operator*(Matrix m1, Matrix m2) {
+    int k = 0;
+    Matrix result;
+    for (int k = 0; k < 16; k += 1) {
+        // "i" is the current row of m1.
+        for (int i = 0; i < 4; i += 1) {
+            // "j" is both the current row of m2 and current column of m1
+            // The current column of m2 is k MOD 4.
+            for (int j = 0; j < 4; j += 1) {
+                result.data[k] += m1.data[4 * i + j] * m2.data[4 * j + (k % 4)];
+            }
+        }
+    }  
+    return result; 
 }
