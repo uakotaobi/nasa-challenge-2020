@@ -4,6 +4,7 @@
 #include <array>
 #include "vector.h"
 #include "point.h"
+#include <ostream>
 
 class Matrix {
     public:
@@ -16,7 +17,7 @@ class Matrix {
         friend Matrix operator*(Matrix m1, Matrix m2);
         friend Vector operator*(Matrix m, Vector v);
         friend Point operator*(Matrix m, Point p);
-
+        friend std::ostream& operator<<(std::ostream&, Matrix m);
     private:
         std::array<double, 16> data;
 };

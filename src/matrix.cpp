@@ -20,8 +20,8 @@ Matrix::Matrix(double a11, double a12, double a13, double a14,
 }
 
 Matrix operator*(Matrix m1, Matrix m2) {
-    int k = 0;
     Matrix result;
+    // "k" is the current position in the result array.  
     for (int k = 0; k < 16; k += 1) {
         // "i" is the current row of m1.
         for (int i = 0; i < 4; i += 1) {
@@ -34,3 +34,12 @@ Matrix operator*(Matrix m1, Matrix m2) {
     }  
     return result; 
 }
+
+std::ostream& operator<<(std::ostream& s, Matrix m) {
+    for (int i = 0; i < 16; i += 1) {
+        s << m.data[i] << ", ";        
+    }
+    return s;
+}     
+    
+    

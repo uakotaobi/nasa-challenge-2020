@@ -6,6 +6,7 @@
 #include "SDL_image.h"
 #include "main_view.h"
 #include "vector.h"
+#include "matrix.h"
 
 void debugPrint() {
     Vector i(1, 0, 0);
@@ -16,6 +17,21 @@ void debugPrint() {
     Vector b(0, 1, 0);
 
     std::cout << a << " x " << b << " == " << crossProduct(a, b) << "\n";
+    
+    Matrix m1(2, 0, 0, 0, 
+              0, 2, 0, 0,
+              0, 0, 2, 0,
+              0, 0, 0, 2);
+              
+    Matrix m2(5, 6, 2, 1, 
+              3, 0, 6, 9,
+              7, 7, 0, 8,
+              8, 2, 1, 3);
+              
+    Matrix result = m1 * m2;
+    
+    std::cout << result;
+    
 }
 
 int main() {
