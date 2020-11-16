@@ -32,6 +32,16 @@ void debugPrint() {
     
     std::cout << result;
     
+    Vector t = Vector(5, 5, -5);
+    Matrix m3(1, 0, 0, t.x,
+              0, 1, 0, t.y,
+              0, 0, 1, t.z,
+              0, 0, 0, 1);
+    Vector v = Vector(1, -6, 8);
+    std::cout << (m3 * v) << "\n";
+    Point p(3, -7, 4);
+    std::cout << (m3 * p) << "\n";
+
 }
 
 int main() {

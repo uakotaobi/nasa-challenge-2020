@@ -25,14 +25,6 @@ Matrix::Matrix(double a11, double a12, double a13, double a14,
 
 Matrix operator*(Matrix m1, Matrix m2) {
     Matrix result;
-    std::cout << result;
-    // FOR k from 0 to 15
-    //     m1_row = FLOOR(k/4)
-    //     m2_column = k % 4
-    //     FOR i from 0 to 3
-    //         result[k] += m1[m1_row * 4 + i] * m2[m2_column + 4 * i]
-    //     NEXT i
-    // NEXT k
 
     // "k" is the current position in the result array.
     for (int k = 0; k < 16; k += 1) {
@@ -58,4 +50,20 @@ std::ostream& operator<<(std::ostream& s, Matrix m) {
         }
     }
     return s;
+}
+
+Vector operator*(Matrix m, Vector v) {
+    double x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z + m.data[3] * 1;
+    double y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z + m.data[7] * 1;
+    double z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z + m.data[11] * 1;
+    Vector result = Vector(x, y, z);
+    return result;
+}
+
+Point operator*(Matrix m, Point p) {
+    double x = m.data[0] * p.x + m.data[1] * p.y + m.data[2] * p.z + m.data[3] * 1;
+    double y = m.data[4] * p.x + m.data[5] * p.y + m.data[6] * p.z + m.data[7] * 1;
+    double z = m.data[8] * p.x + m.data[9] * p.y + m.data[10] * p.z + m.data[11] * 1;
+    Point result = Point(x, y, z);
+    return result;
 }
