@@ -1,5 +1,6 @@
 #ifndef POINT_H_INCLUDED
 #define POINT_H_INCLUDED
+#include <ostream>
 
 // Forward declaration
 class Vector;
@@ -16,6 +17,7 @@ struct Point {
 
     friend Vector operator-(Point p1, Point p2);
 
+    friend std::ostream& operator<<(std::ostream&, Point p);
     
 };
 

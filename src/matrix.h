@@ -22,10 +22,4 @@ class Matrix {
         std::array<double, 16> data;
 };
 
-
-
-
-
-
-
 #endif // MATRIX_H_INCLUDED
