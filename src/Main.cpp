@@ -13,35 +13,8 @@ void debugPrint() {
     Vector j(0, 1, 0);
     Vector k(0, 0, 1);
 
-    Vector a(1, 1, 0);
-    Vector b(0, 1, 0);
-
-    std::cout << a << " x " << b << " == " << crossProduct(a, b) << "\n";
-    
-    Matrix m1(2, 0, 0, 0, 
-              0, 2, 0, 0,
-              0, 0, 2, 0,
-              0, 0, 0, 2);
-              
-    Matrix m2(5, 6, 2, 1, 
-              3, 0, 6, 9,
-              7, 7, 0, 8,
-              8, 2, 1, 3);
-              
-    Matrix result = m1 * m2;
-    
-    std::cout << result;
-    
-    Vector t = Vector(5, 5, -5);
-    Matrix m3(1, 0, 0, t.x,
-              0, 1, 0, t.y,
-              0, 0, 1, t.z,
-              0, 0, 0, 1);
-    Vector v = Vector(1, -6, 8);
-    std::cout << (m3 * v) << "\n";
-    Point p(3, -7, 4);
-    std::cout << (m3 * p) << "\n";
-
+    Vector v = k;
+    std::cout << yRotate(90)*v << "\n";
 }
 
 int main() {

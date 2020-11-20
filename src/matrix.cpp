@@ -1,5 +1,12 @@
 #include "matrix.h"
 #include <iostream>
+#include <cmath>
+
+using std::sin;
+using std::cos;
+using std::tan;
+
+const double deg_to_rad = M_PI/180;
 
 Matrix::Matrix() {
     data = {0, 0, 0, 0,
@@ -66,4 +73,51 @@ Point operator*(Matrix m, Point p) {
     double z = m.data[8] * p.x + m.data[9] * p.y + m.data[10] * p.z + m.data[11] * 1;
     Point result = Point(x, y, z);
     return result;
+}
+
+Matrix translationMatrix(Vector v) {
+    Matrix matrix(1, 0, 0, v.x,
+                  0, 1, 0, v.y,
+                  0, 0, 1, v.z,
+                  0, 0, 0, 1);
+    return matrix;
+}
+
+Matrix scalingMatrix(double xFactor, double yFactor, double zFactor) {
+    Matrix matrix(xFactor, 0, 0, 0,
+                  0, yFactor, 0, 0,
+                  0, 0, zFactor, 0,
+                  0, 0, 0, 1);
+    return matrix;
+}
+
+Matrix scalingMatrix(double scaleFactor) {
+    return scalingMatrix(scaleFactor, scaleFactor, scaleFactor);
+}
+
+Matrix xRotate(double thetaDeg) {
+    double thetaRad = thetaDeg * deg_to_rad;
+    return Matrix(1, 0, 0, 0,
+                  0, cos(thetaRad), -sin(thetaRad), 0,
+                  0, sin(thetaRad), cos(thetaRad), 0,
+                  0, 0, 0, 1);
+
+}
+
+Matrix yRotate(double thetaDeg) {
+    double thetaRad = thetaDeg * deg_to_rad;
+    return Matrix(cos(thetaRad), 0, sin(thetaRad), 0,
+                  0, 1, 0, 0,
+                  -sin(thetaRad), 0, cos(thetaRad), 0,
+                  0, 0, 0, 1);
+
+}
+
+Matrix zRotate(double thetaDeg) {
+    double thetaRad = thetaDeg * deg_to_rad;
+    return Matrix(cos(thetaRad), -sin(thetaRad), 0, 0,
+                  sin(thetaRad), cos(thetaRad), 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+
 }
