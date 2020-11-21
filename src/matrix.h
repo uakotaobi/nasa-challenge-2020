@@ -31,4 +31,7 @@ Matrix scalingMatrix(double scaleFactor);
 Matrix xRotate(double thetaDeg);
 Matrix yRotate(double thetaDeg);
 Matrix zRotate(double thetaDeg);
+
+Matrix projectionMatrix(double focalDistance);
+
 #endif // MATRIX_H_INCLUDED
