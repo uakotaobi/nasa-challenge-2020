@@ -7,6 +7,7 @@ using std::cos;
 using std::tan;
 
 const double deg_to_rad = M_PI/180;
+const double epsilon = 1e-9;
 
 Matrix::Matrix() {
     data = {0, 0, 0, 0,
@@ -63,6 +64,12 @@ Vector operator*(Matrix m, Vector v) {
     double x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z + m.data[3] * 1;
     double y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z + m.data[7] * 1;
     double z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z + m.data[11] * 1;
+    double w = m.data[12] * v.x + m.data[13] * v.y  + m.data[14] * v.z + m.data[15] * 1;
+    if (abs(w) >= epsilon) {
+        x /= w;
+        y /= w;
+        z /= w;
+    }
     Vector result = Vector(x, y, z);
     return result;
 }
@@ -71,6 +78,12 @@ Point operator*(Matrix m, Point p) {
     double x = m.data[0] * p.x + m.data[1] * p.y + m.data[2] * p.z + m.data[3] * 1;
     double y = m.data[4] * p.x + m.data[5] * p.y + m.data[6] * p.z + m.data[7] * 1;
     double z = m.data[8] * p.x + m.data[9] * p.y + m.data[10] * p.z + m.data[11] * 1;
+    double w = m.data[12] * p.x + m.data[13] * p.y  + m.data[14] * p.z + m.data[15] * 1;
+    if (abs(w) >= epsilon) {
+        x /= w;
+        y /= w;
+        z /= w;
+    }
     Point result = Point(x, y, z);
     return result;
 }
