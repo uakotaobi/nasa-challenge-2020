@@ -5,6 +5,7 @@
 #include "vector.h"
 #include "point.h"
 #include <ostream>
+#include "SDL.h"
 
 class Matrix {
     public:
@@ -32,6 +33,8 @@ Matrix xRotate(double thetaDeg);
 Matrix yRotate(double thetaDeg);
 Matrix zRotate(double thetaDeg);
 
-Matrix projectionMatrix(double focalDistance);
+class SDL_Rect;
+Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect);
+
 
 #endif // MATRIX_H_INCLUDED

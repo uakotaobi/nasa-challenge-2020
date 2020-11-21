@@ -134,3 +134,25 @@ Matrix zRotate(double thetaDeg) {
                   0, 0, 0, 1);
 
 }
+
+Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect) {
+    Matrix p(1, 0, 0, 0,
+             0, 1, 0, 0,
+             0, 0, 1/focalDistance, 0,
+             0, 0, 1/focalDistance, 1);
+             
+    Matrix s(1.0/screenRect.w, 0, 0, double(-screenRect.x)/screenRect.w,
+             0, 1.0/screenRect.h,  0, double(-screenRect.y)/screenRect.h,
+             0, 0, 1, 0,
+             0, 0, 0, 1);
+             
+    Matrix v(viewPortRect.w, 0, 0, viewPortRect.x,
+             0, viewPortRect.h, 0, viewPortRect.h,
+             0, 0, 1, 0,
+             0, 0, 0, 1);   
+             
+    return v * s * p;
+}
+
+
+
