@@ -7,6 +7,13 @@
 #include "main_view.h"
 #include "vector.h"
 #include "matrix.h"
+#include <iomanip>
+#include <sstream>
+#include <vector>
+
+std::ostream& operator<<(std::ostream& out, SDL_Rect r) {
+    return out << std::setprecision(3) << "Rect{x=" << r.x << ", y=" << r.y << ", w=" << r.w << ", h=" << r.h << "}";
+}
 
 void debugPrint() {
     Vector i(1, 0, 0);
@@ -14,7 +21,29 @@ void debugPrint() {
     Vector k(0, 0, 1);
 
     Vector v = k;
-    std::cout << yRotate(90)*v << "\n";
+    // std::cout << yRotate(90)*v << "\n";
+
+    const SDL_Rect screenSpaceRect = {-100, -100, 200, 200};
+    const SDL_Rect viewportRect = {0, 0, 800, 600};
+    const double distance = 60;
+    Matrix P = projectionMatrix(distance, screenSpaceRect, viewportRect);
+    std::vector<Point> points = {
+        Point(0, 0, 0),
+        Point(screenSpaceRect.x, screenSpaceRect.y, 0),
+        Point(screenSpaceRect.x + screenSpaceRect.w, screenSpaceRect.y + screenSpaceRect.h, 0),
+        Point(-distance, -distance, distance),
+        Point(distance, distance, distance),
+    };
+    std::cout << "screenSpaceRect: " << screenSpaceRect << "\n";
+    std::cout << "viewportRect:    " << viewportRect << "\n\n";
+    std::cout.width(40);
+    std::cout << std::left << "World space" << "Viewport space\n";
+    for (const Point& p : points) {
+        std::cout.width(40);
+        std::stringstream s;
+        s << p;
+        std::cout << std::left << s.str() << (P * p) << "\n";
+    }
 }
 
 int main() {

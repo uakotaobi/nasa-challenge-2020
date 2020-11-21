@@ -1,12 +1,14 @@
 #include "matrix.h"
 #include <iostream>
 #include <cmath>
+#include <SDL.h>
 
 using std::sin;
 using std::cos;
-using std::tan;
+using std::abs;
 
 const double deg_to_rad = M_PI/180;
+const double epsilon = 1.0e-9;
 
 Matrix::Matrix() {
     data = {0, 0, 0, 0,
@@ -60,17 +62,31 @@ std::ostream& operator<<(std::ostream& s, Matrix m) {
 }
 
 Vector operator*(Matrix m, Vector v) {
-    double x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z + m.data[3] * 1;
-    double y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z + m.data[7] * 1;
-    double z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z + m.data[11] * 1;
+    double x = m.data[0]  * v.x + m.data[1]  * v.y + m.data[2]  * v.z + m.data[3]  * 1;
+    double y = m.data[4]  * v.x + m.data[5]  * v.y + m.data[6]  * v.z + m.data[7]  * 1;
+    double z = m.data[8]  * v.x + m.data[9]  * v.y + m.data[10] * v.z + m.data[11] * 1;
+    double w = m.data[12] * v.x + m.data[13] * v.y + m.data[14] * v.z + m.data[15] * 1;
+    if (abs(w) > epsilon) {
+        // Normalize.
+        x /= w;
+        y /= w;
+        z /= w;
+    }
     Vector result = Vector(x, y, z);
     return result;
 }
 
 Point operator*(Matrix m, Point p) {
-    double x = m.data[0] * p.x + m.data[1] * p.y + m.data[2] * p.z + m.data[3] * 1;
-    double y = m.data[4] * p.x + m.data[5] * p.y + m.data[6] * p.z + m.data[7] * 1;
-    double z = m.data[8] * p.x + m.data[9] * p.y + m.data[10] * p.z + m.data[11] * 1;
+    double x = m.data[0]  * p.x + m.data[1]  * p.y + m.data[2]  * p.z + m.data[3]  * 1;
+    double y = m.data[4]  * p.x + m.data[5]  * p.y + m.data[6]  * p.z + m.data[7]  * 1;
+    double z = m.data[8]  * p.x + m.data[9]  * p.y + m.data[10] * p.z + m.data[11] * 1;
+    double w = m.data[12] * p.x + m.data[13] * p.y + m.data[14] * p.z + m.data[15] * 1;
+    if (abs(w) > epsilon) {
+        // Normalize.
+        x /= w;
+        y /= w;
+        z /= w;
+    }
     Point result = Point(x, y, z);
     return result;
 }
@@ -120,4 +136,96 @@ Matrix zRotate(double thetaDeg) {
                   0, 0, 1, 0,
                   0, 0, 0, 1);
 
+}
+
+Matrix identity() {
+    return Matrix(1, 0, 0, 0,
+                  0, 1, 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+}
+// Produces a matrix that transforms points from world space to screen space,
+// and then from screen space to viewport space.
+//
+// World space is the original location of the point in the virtual world.
+//
+// Screen space is a compressed space -- a box.  The front of this box lies on
+// the world space's XY plane, with an upper left corner of:
+//   (x=screenSpaceRect.x, y=screenSpaceRect.y, z=0)
+// and a lower right corner of:
+//   (x=screenSpaceRect.x + screenSpaceRect.w,
+//    y=screenSpaceRect.y + screenSpaceRect.h,
+//    z=0)
+// The back of the screen space box lies at infinity, but Z-coordinates are
+// still compressed: large Z coordinates in world space have smaller Z
+// coordinates in screen space.
+//
+// Another way to think of the screenSpaceRect is as the field of view for the
+// 3D camera.
+//
+// Viewport space is a scaled transformation of world space meant to represent
+// where you will be drawing on the actual screen.  The front of its box is
+// also on the XY plane, but this time between (viewportRect.x,
+// viewportRect.y) and (viewportRect.x + viewportRect.w, viewportRect.y +
+// viewportRect.h).  The Z coordinates are the same as they were in screen
+// space.  The front upper-left corner of screen space should project to the
+// front upper-left corner of view space, and the line z=0 in world space
+// should project to the center of view space.
+//
+// d is the putative distance from your eyeballs to the XY plane in screen
+// space, and it must be positive.
+Matrix projectionMatrix(double d, SDL_Rect screenSpaceRect, SDL_Rect viewportRect) {
+
+    // The projection formula is:
+    //
+    //   x' = dx / (d + z)
+    //   y' = dy / (d + z)
+    //
+    // So how does this matrix help?  Well, it maps (x, y, z, 1) (as a column
+    // matrix) to (x, y, z/d, z/d + 1).  Pay close attention to that last
+    // number: the final component is *not equal to 1*, even though it was
+    // supposed to be.  That means we need to normalize by *DIVIDING* by z/d +
+    // 1!
+    //
+    //       x / (z/d + 1) =     x / ((z + d) / d) = dx / (z + d)
+    //       y / (z/d + 1) =     y / ((z + d) / d) = dy / (z + d)
+    //   (z/d) / (z/d + 1) = (z/d) / ((z + d) / d) =  z / (z + d)
+    //
+    // So this really _is_ the projection formula, provided matrix
+    // multiplication normalizes when it's done.
+    //
+    // Along the way, we flip the sign of y, since positive Y points in the
+    // downward direction in screen screen space.
+
+    Matrix p(1,  0, 0,     0,
+             0, -1, 0,     0,
+             0,  0, 1.0/d, 0,
+             0,  0, 1.0/d, 1);
+
+    // To translate the X and Y coordinates from world space to screen space,
+    // we use linear interpolation:
+    //
+    //   u = (x' - screenSpaceRect.x) / (screenSpaceRect.w)
+    //   v = (y' - screenSpaceRect.y) / (screenSpaceRect.h)
+    //
+    // Note that 0 <= u <= 1 and 0 <= v <= 1 if a point is on the screen.
+
+    Matrix s(1.0 / screenSpaceRect.w, 0,                       0, double(-screenSpaceRect.x) / screenSpaceRect.w,
+             0,                       1.0 / screenSpaceRect.h, 0, double(-screenSpaceRect.y) / screenSpaceRect.h,
+             0,                       0,                       1, 0,
+             0,                       0,                       0, 1);
+    std::cout << s;
+
+    // Since u and v are normalized, scaling them to view space is simple:
+    //
+    //   final x = viewportRect.x + u * viewportRect.w
+    //   final y = viewportRect.y + v * viewportRect.h
+
+    Matrix v(viewportRect.w, 0,              0, viewportRect.x,
+             0,              viewportRect.h, 0, viewportRect.y,
+             0,              0,              1, 0,
+             0,              0,              0, 1);
+
+    // Apply the transformations in reverse.
+    return v * s * p;
 }

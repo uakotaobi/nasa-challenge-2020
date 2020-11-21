@@ -31,4 +31,9 @@ Matrix scalingMatrix(double scaleFactor);
 Matrix xRotate(double thetaDeg);
 Matrix yRotate(double thetaDeg);
 Matrix zRotate(double thetaDeg);
+
+Matrix identity();
+class SDL_Rect;
+Matrix projectionMatrix(double d, SDL_Rect screenSpaceRect, SDL_Rect viewportRect);
+
 #endif // MATRIX_H_INCLUDED
