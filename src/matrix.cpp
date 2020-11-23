@@ -142,6 +142,29 @@ Matrix zRotate(double thetaDeg) {
 
 }
 
+Matrix rotationMatrix(Vector axis, double thetaDeg) {
+
+    double thetaRad = thetaDeg * deg_to_rad;
+    double cosTheta = cos(thetaRad);
+    double sinTheta = sin(thetaRad);
+    double u = axis.x;
+    double v = axis.y;
+    double w = axis.z;
+
+    return Matrix(   cosTheta + u*u*(1-cosTheta), -w*sinTheta + u*v*(1-cosTheta),  v*sinTheta + u*w*(1-cosTheta), 0,
+                   w*sinTheta + v*u*(1-cosTheta),    cosTheta + v*v*(1-cosTheta), -u*sinTheta + v*w*(1-cosTheta), 0,
+                  -v*sinTheta + w*u*(1-cosTheta),  u*sinTheta + w*v*(1-cosTheta),    cosTheta + w*w*(1-cosTheta), 0,
+                  0, 0, 0, 1);
+}
+
+Matrix rotationMatrix(Point a, Point b, double thetaDeg) {
+    // Axis is a vector that point from a to b.
+    Vector axis = b - a;
+    Matrix translateToOrigin = translationMatrix(-Vector(a));
+    Matrix translateFromOrigin = translationMatrix(Vector(a));
+
+    return translateFromOrigin * rotationMatrix(axis, thetaDeg) * translateToOrigin;
+}
 
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect) {
     // World Space to World Space's XY plane

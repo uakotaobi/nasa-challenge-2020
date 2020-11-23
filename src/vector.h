@@ -11,10 +11,12 @@ struct Vector {
 
 	Vector();
 	Vector(double x_, double y_, double z_);
+    Vector(Point p);
 
 	double magnitude() const;
     friend Point operator+(Point p, Vector v);
     friend Point operator+(Vector v, Point p);
+    friend Vector operator-(Vector v);
     friend Vector operator*(Vector v, double f);
     friend Vector operator*(double f, Vector v);
     friend Vector operator/(Vector v, double f);

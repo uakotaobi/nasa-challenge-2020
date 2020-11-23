@@ -35,6 +35,9 @@ Matrix xRotate(double thetaDeg);
 Matrix yRotate(double thetaDeg);
 Matrix zRotate(double thetaDeg);
 
+Matrix rotationMatrix(Vector axis, double thetaDeg);
+Matrix rotationMatrix(Point a, Point b, double thetaDeg);
+
 class SDL_Rect;
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect);
 

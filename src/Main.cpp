@@ -11,10 +11,20 @@
 #include "vector.h"
 #include "matrix.h"
 
+using namespace std;
+
 void debugPrint() {
     Vector i(1, 0, 0);
     Vector j(0, 1, 0);
     Vector k(0, 0, 1);
+    Point  p(1, 2, 3);
+    double thetaDeg = 45;
+
+    cout << xRotate(thetaDeg)*p << "\t" << rotationMatrix(i, thetaDeg)*p << "\n";
+    cout << yRotate(thetaDeg)*p << "\t" << rotationMatrix(j, thetaDeg)*p << "\n";
+    cout << zRotate(thetaDeg)*p << "\t" << rotationMatrix(k, thetaDeg)*p << "\n";
+    Point a(5, 5, 5), b(5, 10, 5);
+    cout << rotationMatrix(a, b, thetaDeg)*p << " BUG\n";
 
     double focalDistance = 60;
     SDL_Rect screenRect = {-100, -100, 200, 200};

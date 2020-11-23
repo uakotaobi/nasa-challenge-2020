@@ -8,6 +8,8 @@ Vector::Vector(): x(0), y(0), z(0) { }
 
 Vector::Vector(double x_, double y_, double z_): x(x_), y(y_), z(z_) { }
 
+Vector::Vector(Point p): x(p.x), y(p.y), z(p.z) { }
+
 double Vector::magnitude() const {
     return std::hypot(x, y, z);
 }
@@ -18,6 +20,10 @@ Point operator+(Point p, Vector v) {
 
 Point operator+(Vector v, Point p) {
     return Point(p.x+v.x, p.y+v.y, p.z+v.z);
+}
+
+Vector operator-(Vector v) {
+    return Vector(-v.x, -v.y, -v.z);
 }
 
 Vector operator*(Vector v, double f) {
