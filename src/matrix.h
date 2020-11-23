@@ -23,6 +23,8 @@ class Matrix {
         std::array<double, 16> data;
 };
 
+Matrix identityMatrix();
+
 Matrix translationMatrix(Vector v);
 
 Matrix scalingMatrix(double xFactor, double yFactor, double zFactor);

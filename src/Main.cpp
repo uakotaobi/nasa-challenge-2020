@@ -1,4 +1,7 @@
 #include <iostream>
+#include <sstream>
+#include <vector>
+
 #include "SDL.h"
 #include "button_view.h"
 #include "SDL_ttf.h"
@@ -13,8 +16,39 @@ void debugPrint() {
     Vector j(0, 1, 0);
     Vector k(0, 0, 1);
 
-    Vector v = k;
-    std::cout << yRotate(90)*v << "\n";
+    double focalDistance = 60;
+    SDL_Rect screenRect = {-100, -100, 200, 200};
+    SDL_Rect viewPortRect = {0, 0, 1500, 1000};
+
+    std::vector<Point> points = {
+        // Should project to 750, 500
+        Point(0, 0, 0),
+
+        // Should project to upper left corner (0, 0)
+        Point(-100, -100, 0),
+
+        // Should project to lower right corner (1500, 1000)
+        Point(100, 100, 0),
+
+        // Should projerct in 4th quadrant (1125, 750, 1/3)
+        Point(50, 50, 0),
+        Point(50, -50, 0),
+        Point(-50, -50, 0),
+        Point(-50, 50, 0),
+        Point(50, 50, 50),
+        Point(50, -50, 50),
+        Point(-50, -50, 50),
+        Point(-50, 50, 50)
+
+
+    };
+
+    for (std::vector<Point>::iterator iter = points.begin(); iter != points.end(); iter++) {
+        std::stringstream s;
+        s << *iter;
+        std::cout.width(40);
+        std::cout << std::left << s.str() << projectionMatrix(focalDistance, screenRect, viewPortRect) * (*iter) << "\n";
+    }
 }
 
 int main() {

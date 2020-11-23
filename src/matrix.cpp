@@ -88,6 +88,13 @@ Point operator*(Matrix m, Point p) {
     return result;
 }
 
+Matrix identityMatrix() {
+    return Matrix(1, 0, 0, 0,
+                  0, 1, 0, 0,
+                  0, 0, 1, 0,
+                  0, 0, 0, 1);
+}
+
 Matrix translationMatrix(Vector v) {
     Matrix matrix(1, 0, 0, v.x,
                   0, 1, 0, v.y,
@@ -135,24 +142,29 @@ Matrix zRotate(double thetaDeg) {
 
 }
 
+
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect) {
+    // World Space to World Space's XY plane
     Matrix p(1, 0, 0, 0,
-             0, 1, 0, 0,
+             0, -1, 0, 0,
              0, 0, 1/focalDistance, 0,
              0, 0, 1/focalDistance, 1);
-             
+
+    // Rectangle on XY plane, shrinks everything in screenRect to between 0-1 on XY
     Matrix s(1.0/screenRect.w, 0, 0, double(-screenRect.x)/screenRect.w,
              0, 1.0/screenRect.h,  0, double(-screenRect.y)/screenRect.h,
              0, 0, 1, 0,
              0, 0, 0, 1);
-             
+
+    // Scaling out from 0-1 to screen space's viewPortRect
     Matrix v(viewPortRect.w, 0, 0, viewPortRect.x,
-             0, viewPortRect.h, 0, viewPortRect.h,
+             0, viewPortRect.h, 0, viewPortRect.y,
              0, 0, 1, 0,
-             0, 0, 0, 1);   
-             
+             0, 0, 0, 1);
+
+    // v = identityMatrix();
+    // s = identityMatrix();
+
+    // Multiply matrices in reverse order that you want the operations to occur (p, then s, then v)
     return v * s * p;
 }
-
-
-
