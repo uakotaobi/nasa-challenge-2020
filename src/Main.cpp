@@ -17,13 +17,14 @@ void debugPrint() {
     Vector i(1, 0, 0);
     Vector j(0, 1, 0);
     Vector k(0, 0, 1);
-    Point  p(1, 2, 3);
-    double thetaDeg = 45;
+    Point  p(5, 5, 10);
+    double thetaDeg = 90;
 
     cout << xRotate(thetaDeg)*p << "\t" << rotationMatrix(i, thetaDeg)*p << "\n";
     cout << yRotate(thetaDeg)*p << "\t" << rotationMatrix(j, thetaDeg)*p << "\n";
     cout << zRotate(thetaDeg)*p << "\t" << rotationMatrix(k, thetaDeg)*p << "\n";
     Point a(5, 5, 5), b(5, 10, 5);
+    cout << rotationMatrix(b - a, thetaDeg);
     cout << rotationMatrix(a, b, thetaDeg)*p << " BUG\n";
 
     double focalDistance = 60;

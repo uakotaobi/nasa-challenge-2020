@@ -159,7 +159,9 @@ Matrix rotationMatrix(Vector axis, double thetaDeg) {
 
 Matrix rotationMatrix(Point a, Point b, double thetaDeg) {
     // Axis is a vector that point from a to b.
-    Vector axis = b - a;
+    // TODO: Firgure out if we need to reverse the axis vector
+    // Should rotate conterclockwise according to the right hand rule    
+    Vector axis = -normalize(b - a);
     Matrix translateToOrigin = translationMatrix(-Vector(a));
     Matrix translateFromOrigin = translationMatrix(Vector(a));
 
