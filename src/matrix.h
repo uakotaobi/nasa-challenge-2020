@@ -41,5 +41,7 @@ Matrix rotationMatrix(Point a, Point b, double thetaDeg);
 class SDL_Rect;
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect);
 
+Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p);
+
 
 #endif // MATRIX_H_INCLUDED

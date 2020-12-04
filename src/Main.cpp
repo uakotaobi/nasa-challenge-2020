@@ -14,51 +14,26 @@
 using namespace std;
 
 void debugPrint() {
-    Vector i(1, 0, 0);
-    Vector j(0, 1, 0);
-    Vector k(0, 0, 1);
-    Point  p(5, 5, 10);
-    double thetaDeg = 90;
-
-    cout << xRotate(thetaDeg)*p << "\t" << rotationMatrix(i, thetaDeg)*p << "\n";
-    cout << yRotate(thetaDeg)*p << "\t" << rotationMatrix(j, thetaDeg)*p << "\n";
-    cout << zRotate(thetaDeg)*p << "\t" << rotationMatrix(k, thetaDeg)*p << "\n";
-    Point a(5, 5, 5), b(5, 10, 5);
-    cout << rotationMatrix(b - a, thetaDeg);
-    cout << rotationMatrix(a, b, thetaDeg)*p << " BUG\n";
-
     double focalDistance = 60;
     SDL_Rect screenRect = {-100, -100, 200, 200};
     SDL_Rect viewPortRect = {0, 0, 1500, 1000};
 
+    Vector you_x_axis(-1, 0, 1);
+    Vector you_z_axis(1, 0, 1);
+    Vector you_y_axis(0, 1, 0);
+
+    Point you(0, 0, 0);
+    Point that = you + you_z_axis * 2;
     std::vector<Point> points = {
-        // Should project to 750, 500
-        Point(0, 0, 0),
-
-        // Should project to upper left corner (0, 0)
-        Point(-100, -100, 0),
-
-        // Should project to lower right corner (1500, 1000)
-        Point(100, 100, 0),
-
-        // Should projerct in 4th quadrant (1125, 750, 1/3)
-        Point(50, 50, 0),
-        Point(50, -50, 0),
-        Point(-50, -50, 0),
-        Point(-50, 50, 0),
-        Point(50, 50, 50),
-        Point(50, -50, 50),
-        Point(-50, -50, 50),
-        Point(-50, 50, 50)
-
-
+        that
     };
 
     for (std::vector<Point>::iterator iter = points.begin(); iter != points.end(); iter++) {
         std::stringstream s;
         s << *iter;
         std::cout.width(40);
-        std::cout << std::left << s.str() << projectionMatrix(focalDistance, screenRect, viewPortRect) * (*iter) << "\n";
+        // std::cout << std::left << s.str() << projectionMatrix(focalDistance, screenRect, viewPortRect) * (*iter) << "\n";
+        std::cout << std::left << s.str() << cameraTransform(you_x_axis, you_y_axis, you_z_axis, you) * (*iter) << "\n";
     }
 }
 

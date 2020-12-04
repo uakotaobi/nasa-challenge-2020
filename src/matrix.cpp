@@ -147,6 +147,7 @@ Matrix rotationMatrix(Vector axis, double thetaDeg) {
     double thetaRad = thetaDeg * deg_to_rad;
     double cosTheta = cos(thetaRad);
     double sinTheta = sin(thetaRad);
+    axis = normalize(axis);
     double u = axis.x;
     double v = axis.y;
     double w = axis.z;
@@ -160,8 +161,8 @@ Matrix rotationMatrix(Vector axis, double thetaDeg) {
 Matrix rotationMatrix(Point a, Point b, double thetaDeg) {
     // Axis is a vector that point from a to b.
     // TODO: Firgure out if we need to reverse the axis vector
-    // Should rotate conterclockwise according to the right hand rule    
-    Vector axis = -normalize(b - a);
+    // Should rotate conterclockwise according to the right hand rule
+    Vector axis = -(b - a);
     Matrix translateToOrigin = translationMatrix(-Vector(a));
     Matrix translateFromOrigin = translationMatrix(Vector(a));
 
@@ -192,4 +193,22 @@ Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect view
 
     // Multiply matrices in reverse order that you want the operations to occur (p, then s, then v)
     return v * s * p;
+}
+
+Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p) {
+    Matrix p_to_origin(translationMatrix(-Vector(p)));
+    Matrix origin_to_p(translationMatrix(Vector(p)));
+    X = normalize(X);
+    Y = normalize(Y);
+    Z = normalize(Z);
+    Matrix rigidBodyTransformation(X.x, Y.x, Z.x, 0,
+                                   X.y, Y.y, Z.y, 0,
+                                   X.z, Y.z, Z.z, 0,
+                                   0, 0, 0, 1);
+    // Matrix rigidBodyTransformation(X.x, X.y, X.z, 0,
+    //                                Y.x, Y.y, Y.z, 0,
+    //                                Z.x, Z.y, Z.z, 0,
+    //                                0, 0, 0, 1);
+    std::cout << origin_to_p * rigidBodyTransformation * p_to_origin;
+    return origin_to_p * rigidBodyTransformation * p_to_origin;
 }
