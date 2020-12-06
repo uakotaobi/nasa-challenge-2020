@@ -197,7 +197,6 @@ Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect view
 
 Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p) {
     Matrix p_to_origin(translationMatrix(-Vector(p)));
-    Matrix origin_to_p(translationMatrix(Vector(p)));
     X = normalize(X);
     Y = normalize(Y);
     Z = normalize(Z);
@@ -209,6 +208,5 @@ Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p) {
     //                                Y.x, Y.y, Y.z, 0,
     //                                Z.x, Z.y, Z.z, 0,
     //                                0, 0, 0, 1);
-    std::cout << origin_to_p * rigidBodyTransformation * p_to_origin;
-    return origin_to_p * rigidBodyTransformation * p_to_origin;
+    return rigidBodyTransformation * p_to_origin;
 }

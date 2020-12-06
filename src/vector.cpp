@@ -26,6 +26,10 @@ Vector operator-(Vector v) {
     return Vector(-v.x, -v.y, -v.z);
 }
 
+Point operator-(Point p, Vector v) {
+    return Point(p.x-v.x, p.y-v.y, p.z-v.z);
+}
+
 Vector operator*(Vector v, double f) {
     return Vector(v.x*f, v.y*f, v.z*f);
 }

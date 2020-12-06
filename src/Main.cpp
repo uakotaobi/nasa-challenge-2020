@@ -22,8 +22,12 @@ void debugPrint() {
     Vector you_z_axis(1, 0, 1);
     Vector you_y_axis(0, 1, 0);
 
-    Point you(0, 0, 0);
-    Point that = you + you_z_axis * 2;
+    you_x_axis = normalize(you_x_axis);
+    you_y_axis = normalize(you_y_axis);
+    you_z_axis = normalize(you_z_axis);
+
+    Point you(0, 0, 4);
+    Point that = you + you_z_axis * 2 - you_y_axis * 4 + you_x_axis * 100;
     std::vector<Point> points = {
         that
     };
