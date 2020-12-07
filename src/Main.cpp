@@ -10,6 +10,7 @@
 #include "main_view.h"
 #include "vector.h"
 #include "matrix.h"
+#include "plane.h"
 
 using namespace std;
 
@@ -27,17 +28,21 @@ void debugPrint() {
     you_z_axis = normalize(you_z_axis);
 
     Point you(0, 0, 4);
-    Point that = you + you_z_axis * 2 - you_y_axis * 4 + you_x_axis * 100;
+    Point that = you + you_x_axis * 100 - you_y_axis * 4 + you_z_axis * 2;
     std::vector<Point> points = {
-        that
+        that,
+        you - you_x_axis * 10 - you_y_axis * 1000000 - you_z_axis * 15,
+        you - you_x_axis * 0 - you_y_axis * 0 - you_z_axis * 0
     };
 
+    Plane p(you, you_z_axis);
     for (std::vector<Point>::iterator iter = points.begin(); iter != points.end(); iter++) {
         std::stringstream s;
         s << *iter;
         std::cout.width(40);
         // std::cout << std::left << s.str() << projectionMatrix(focalDistance, screenRect, viewPortRect) * (*iter) << "\n";
-        std::cout << std::left << s.str() << cameraTransform(you_x_axis, you_y_axis, you_z_axis, you) * (*iter) << "\n";
+        std::cout << std::left << s.str() << cameraTransform(you_x_axis, you_y_axis, you_z_axis, you) * (*iter) << ",      " << p.whichSide(*iter) << "\n";
+
     }
 }
 
