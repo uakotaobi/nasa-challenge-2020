@@ -19,10 +19,10 @@ struct GridPoint : public Point {
 class Grid {
     public:
         Grid();
-        
+
         // Construct a grid with the given dimensions.
-        // 
-        // - rows: the depth of the grid 
+        //
+        // - rows: the depth of the grid
         // - columns: the width of the grid
         // - cellSize: the space between grid cells according to the grid's own basis
         Grid(int rows, int columns, double cellSize = 1.0 );
@@ -32,8 +32,9 @@ class Grid {
         Vector axisX, axisY, axisZ;
         int rows, columns;
         double cellSize;
-        
-        
+        void setLatticePoints();
+
+
 };
 
 
