@@ -61,10 +61,11 @@ std::ostream& operator<<(std::ostream& s, Matrix m) {
 }
 
 Vector operator*(Matrix m, Vector v) {
-    double x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z + m.data[3] * 1;
-    double y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z + m.data[7] * 1;
-    double z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z + m.data[11] * 1;
-    double w = m.data[12] * v.x + m.data[13] * v.y  + m.data[14] * v.z + m.data[15] * 1;
+    // 0 at end because vectors can't be translated, they don't have a location, just a direction
+    double x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z + m.data[3] * 0;
+    double y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z + m.data[7] * 0;
+    double z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z + m.data[11] * 0;
+    double w = m.data[12] * v.x + m.data[13] * v.y  + m.data[14] * v.z + m.data[15] * 0;
     if (abs(w) >= epsilon) {
         x /= w;
         y /= w;
