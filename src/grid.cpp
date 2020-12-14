@@ -41,5 +41,12 @@ void Grid::setLatticePoints() {
             gridPoint.z = actualLocation.z;
         }
     }
-
 }
+
+void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
+    
+}
+
+
+
+

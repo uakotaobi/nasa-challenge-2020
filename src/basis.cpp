@@ -8,3 +8,10 @@ Basis::Basis(Point center_, Vector axisX_, Vector axisY_, Vector axisZ_)
     : center(center_), axisX(axisX_), axisY(axisY_), axisZ(axisZ_){
 
 }
+
+void Basis::apply(Matrix transformationMatrix) {
+    center = transformationMatrix * center;
+    axisX = transformationMatrix * axisX;
+    axisY = transformationMatrix * axisY;
+    axisZ = transformationMatrix * axisZ;
+}
