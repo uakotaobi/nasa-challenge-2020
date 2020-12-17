@@ -44,7 +44,17 @@ void Grid::setLatticePoints() {
 }
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
+    Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
     
+    const double focalDistance = 24;
+    SDL_Rect screenRect = {0, 0, canvas->w, canvas->h};
+    
+    Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
+    
+    
+    for (const GridPoint& currentPoint: lattice) {
+        
+    }
 }
 
 
