@@ -32,8 +32,7 @@ class Grid {
 
     private:
         std::vector<GridPoint> lattice;
-        Point center;
-        Vector axisX, axisY, axisZ;
+        Basis system;
         int rows, columns;
         double cellSize;
         void setLatticePoints();
