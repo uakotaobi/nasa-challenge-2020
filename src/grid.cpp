@@ -1,14 +1,12 @@
 #include "grid.h"
+#include "plane.h"
 
 GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{0, 0, 0}), temperatureKelvin(0), slopeDeg(0), height(0) {}
 GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, double slopeDeg_, double height_)
     : Point(p), color(color_), temperatureKelvin(temperatureKelvin_), slopeDeg(slopeDeg_), height(height_) {}
 
 Grid::Grid() : lattice((49 + 1) * (49 + 1)),
-               center(0, 0, 0),
-               axisX(1, 0, 0),
-               axisY(0, 1, 0),
-               axisZ(0, 0, 1),
+               system(),
                rows(49),
                columns(49),
                cellSize(1) {
@@ -17,10 +15,7 @@ Grid::Grid() : lattice((49 + 1) * (49 + 1)),
 
 Grid::Grid(int rows_, int columns_, double cellSize_)
     : lattice((rows_ + 1) * (columns_ + 1)),
-      center(0, 0, 0),
-      axisX(1, 0, 0),
-      axisY(0, 1, 0),
-      axisZ(0, 0, 1),
+      system(),
       rows(rows_),
       columns(columns_),
       cellSize(cellSize_) {
@@ -28,14 +23,14 @@ Grid::Grid(int rows_, int columns_, double cellSize_)
 }
 
 void Grid::setLatticePoints() {
-    Point displacedCenter = center;
-    displacedCenter.x = center.x + ((columns + 1) * cellSize);
-    displacedCenter.z = center.z - ((rows + 1) * cellSize);
+    Point displacedCenter = system.center;
+    displacedCenter.x = system.center.x + ((columns + 1) * cellSize);
+    displacedCenter.z = system.center.z - ((rows + 1) * cellSize);
     for (int row = 0; row <= rows; row += 1) {
         for (int column = 0; column <= columns; column += 1) {
             int index = (row * columns) + column;
             GridPoint& gridPoint = lattice[index];
-            Point actualLocation = displacedCenter + (column * cellSize * axisX) + (row * cellSize * axisZ) + (gridPoint.height * axisY);
+            Point actualLocation = displacedCenter + (column * cellSize * system.axisX) + (row * cellSize * system.axisZ) + (gridPoint.height * system.axisY);
             gridPoint.x = actualLocation.x;
             gridPoint.y = actualLocation.y;
             gridPoint.z = actualLocation.z;
@@ -44,19 +39,34 @@ void Grid::setLatticePoints() {
 }
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
-    Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
-    
+    const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
+    const Plane cameraPlane = Plane(camera.center, camera.axisZ);
     const double focalDistance = 24;
-    SDL_Rect screenRect = {0, 0, canvas->w, canvas->h};
-    
-    Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
-    
-    
+    // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
+    // Growing this rectangle zooms the camera out.
+    const SDL_Rect screenRect = {-100, -100, 200, 200};
+
+    const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
+    const Matrix megaMatrix = projectionMatrix * cameraMatrix;
+
     for (const GridPoint& currentPoint: lattice) {
-        
+        Point p = currentPoint;
+
+        // Is the point behind the camera? If so, get rid of it.
+        if (cameraPlane.whichSide(p) < 0) {
+            continue;
+        }
+
+        // Transfrom p from world space to camera space.
+        // Then transform p from camera space to viewport space.
+        p = megaMatrix * p;
+
+        // Any point out of bounds of the view rectangle is skipped.
+        if (p.x < viewPortRect.x ||
+            p.y < viewPortRect.y ||
+            p.x >= viewPortRect.x + viewPortRect.w ||
+            p.y >= viewPortRect.y + viewPortRect.h) {
+            // TODO: skip this point and render all unskipped points onto the SDL surface.
+        }
     }
 }
-
-
-
-
