@@ -45,7 +45,6 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
     // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
     // Growing this rectangle zooms the camera out.
     const SDL_Rect screenRect = {-100, -100, 200, 200};
-<<<<<<< HEAD
 
     const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
     const Matrix megaMatrix = projectionMatrix * cameraMatrix;
@@ -77,30 +76,5 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
         // width*y+x
         unsigned int offset = canvas->w * static_cast<unsigned int>(p.y) + static_cast<unsigned int>(p.x);
         pixels[offset] = SDL_MapRGBA(canvas->format, currentPoint.color.r, currentPoint.color.g, currentPoint.color.b, currentPoint.color.a);
-=======
-
-    const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
-    const Matrix megaMatrix = projectionMatrix * cameraMatrix;
-
-    for (const GridPoint& currentPoint: lattice) {
-        Point p = currentPoint;
-
-        // Is the point behind the camera? If so, get rid of it.
-        if (cameraPlane.whichSide(p) < 0) {
-            continue;
-        }
-
-        // Transfrom p from world space to camera space.
-        // Then transform p from camera space to viewport space.
-        p = megaMatrix * p;
-
-        // Any point out of bounds of the view rectangle is skipped.
-        if (p.x < viewPortRect.x ||
-            p.y < viewPortRect.y ||
-            p.x >= viewPortRect.x + viewPortRect.w ||
-            p.y >= viewPortRect.y + viewPortRect.h) {
-            // TODO: skip this point and render all unskipped points onto the SDL surface.
-        }
->>>>>>> 1d0c8e310e124d6c3e3c0504489478d502482f22
     }
 }
