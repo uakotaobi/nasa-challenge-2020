@@ -1,7 +1,8 @@
 #include "grid.h"
 #include "plane.h"
+#include <iostream>
 
-GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{0, 0, 0}), temperatureKelvin(0), slopeDeg(0), height(0) {}
+GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{255, 255, 255}), temperatureKelvin(0), slopeDeg(0), height(0) {}
 GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, double slopeDeg_, double height_)
     : Point(p), color(color_), temperatureKelvin(temperatureKelvin_), slopeDeg(slopeDeg_), height(height_) {}
 
@@ -74,7 +75,26 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
         // Render points that weren't skipped.
         // Offset formula:
         // width*y+x
-        unsigned int offset = canvas->w * static_cast<unsigned int>(p.y) + static_cast<unsigned int>(p.x);
-        pixels[offset] = SDL_MapRGBA(canvas->format, currentPoint.color.r, currentPoint.color.g, currentPoint.color.b, currentPoint.color.a);
+        // unsigned int offset = canvas->w * static_cast<unsigned int>(p.y) + static_cast<unsigned int>(p.x);
+        // pixels[offset] = SDL_MapRGBA(canvas->format, currentPoint.color.r, currentPoint.color.g, currentPoint.color.b, currentPoint.color.a);
+
+        // Temporary: make the pixels much bigger to see better.
+        const int pixelSize = 100;
+        SDL_Rect pixelRect = {static_cast<int>(p.x) - pixelSize/2,
+                              static_cast<int>(p.y) - pixelSize/2,
+                              pixelSize,
+                              pixelSize};
+        SDL_Rect intersection;
+        if (SDL_IntersectRect(&viewPortRect, &pixelRect, &intersection)) {
+            SDL_FillRect(canvas,
+                         &pixelRect,
+                         SDL_MapRGBA(canvas->format,
+                                     currentPoint.color.r,
+                                     currentPoint.color.g,
+                                     currentPoint.color.b,
+                                     currentPoint.color.a));
+            std::cout << p << '\n';
+        }
+
     }
 }

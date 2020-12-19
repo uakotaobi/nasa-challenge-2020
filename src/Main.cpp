@@ -47,8 +47,8 @@ void debugPrint() {
 }
 
 int main() {
-    debugPrint();
-    return 0;
+    // debugPrint();
+    // return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
@@ -157,6 +157,12 @@ int main() {
             SDL_RenderCopy(renderer, texture, nullptr, nullptr);
             SDL_RenderPresent(renderer);
             SDL_DestroyTexture(texture);
+
+            // Warning: temporary!
+            // Quit after rendering the first frame.
+            if (currentView == 1) {
+                break;
+            }
         }
         SDL_Delay(1000/30);
     }

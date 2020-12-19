@@ -35,7 +35,10 @@ Matrix xRotate(double thetaDeg);
 Matrix yRotate(double thetaDeg);
 Matrix zRotate(double thetaDeg);
 
+// Returns a rotation matrix around a line that starts at the origin and points in the given direction.
 Matrix rotationMatrix(Vector axis, double thetaDeg);
+
+// Returns a rotation matrix around an arbitrary line.
 Matrix rotationMatrix(Point a, Point b, double thetaDeg);
 
 class SDL_Rect;

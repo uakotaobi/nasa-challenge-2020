@@ -2,6 +2,8 @@
 #define MOON_VIEW_H_INCLUDED
 
 #include "view.h"
+#include "grid.h"
+#include "basis.h"
 
 class MoonView : public View {
     public:
@@ -11,6 +13,8 @@ class MoonView : public View {
         // void handleResize(SDL_Surface* screen);
     private:
         SDL_Rect boundaryMoonView;
+        Grid moonGrid;
+        Basis camera;
 };
 
 
