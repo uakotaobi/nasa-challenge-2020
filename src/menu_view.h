@@ -5,6 +5,7 @@
 #include "view.h"
 #include "button_view.h"
 
+// MenuView is responsible for the initial menu when the program opens
 class MenuView : public View {
     public:
         MenuView(SDL_Surface* surf, int& currentView);

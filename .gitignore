@@ -36,3 +36,6 @@ build/
 
 # Mac OS Ignores
 .DS_Store
+
+# Ignore vs code artifacts
+.vscode

@@ -2,14 +2,12 @@
 #include "asset_manager.h"
 #include "SDL.h"
 
-ButtonView::ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback, int deltaX, int deltaY) {
+ButtonView::ButtonView(SDL_Rect buttonBoundary, std::string buttonText, SDL_Color buttonColor, std::function<void()> callback) {
     buttonBoundary_ = buttonBoundary;
     buttonText_ = buttonText;
     buttonColor_ = buttonColor;
     borderColor_ = SDL_Color{55, 128, 189};
     callback_ = callback;
-    this->deltaX = deltaX;
-    this->deltaY = deltaY;
     const AssetManager& am = getAssetManager();
     TTF_Font* buttonFont = am.getFont("gidole");
     renderText = TTF_RenderUTF8_Shaded(buttonFont, buttonText.c_str(), SDL_Color{0, 0, 0, 255}, buttonColor_);
@@ -22,8 +20,8 @@ ButtonView::~ButtonView() {
 
 SDL_Rect ButtonView::boundary() const {
     return SDL_Rect {
-      buttonBoundary_.x + deltaX,
-      buttonBoundary_.y + deltaY,
+      buttonBoundary_.x,
+      buttonBoundary_.y,
       buttonBoundary_.w,
       buttonBoundary_.h
     };
@@ -32,8 +30,6 @@ SDL_Rect ButtonView::boundary() const {
 void ButtonView::draw(SDL_Surface* screen) {
 
     SDL_Rect buttonBoundary = buttonBoundary_;
-    buttonBoundary.x = screen->w / 2 + deltaX;
-    buttonBoundary.y = screen->h / 2 + deltaY;
 
     SDL_Rect innerButtonBoundary = {buttonBoundary.x+5, buttonBoundary.y+5, buttonBoundary.w-10, buttonBoundary.h-10};
 
@@ -65,6 +61,7 @@ void ButtonView::handleClicks(SDL_MouseButtonEvent& mouseButtonEvent) {
     callback_();
 }
 
-
-void ButtonView::handleResize(SDL_Surface* newSurface) {
+void ButtonView::changeBoundary(SDL_Rect newBoundary) {
+    buttonBoundary_ = newBoundary;
 }
+
