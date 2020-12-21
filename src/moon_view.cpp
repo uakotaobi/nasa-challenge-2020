@@ -4,12 +4,12 @@
 
 MoonView::MoonView(SDL_Rect moonBoundary, int deltaX, int deltaY) {
     boundaryMoonView = moonBoundary;
-    moonGrid = Grid(3, 3, 10.0);
+    moonGrid = Grid(300, 300, 6.0);
 
     // Move the camera so it's above the grid and tilted down towards the grid.
     camera = Basis();
-    Matrix translationMatrix = ::translationMatrix(Vector(0, 10, 0));
-    Matrix rotationMatrix = ::rotationMatrix(camera.center, camera.center + camera.axisX, -50);
+    Matrix translationMatrix = ::translationMatrix(Vector(0, 400, 0));
+    Matrix rotationMatrix = ::rotationMatrix(camera.center, camera.center + camera.axisX, 75);
     camera.apply(rotationMatrix * translationMatrix);
 }
 

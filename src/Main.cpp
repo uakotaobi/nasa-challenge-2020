@@ -158,11 +158,11 @@ int main() {
             SDL_RenderPresent(renderer);
             SDL_DestroyTexture(texture);
 
-            // Warning: temporary!
+            /* // Warning: temporary!
             // Quit after rendering the first frame.
             if (currentView == 1) {
                 break;
-            }
+            } */
         }
         SDL_Delay(1000/30);
     }
