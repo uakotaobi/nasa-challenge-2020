@@ -1,9 +1,20 @@
 PROJECT(altitution CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 SET(CMAKE_CXX_STANDARD 17)
+
+# For Cygwin environments only: helps find_package to locate Cygwin's SDL2 libraries. 
+IF(CYGWIN)
+    SET(SDL2_TTF_LIBRARY "c:/tools/cygwin/lib/libSDL2_ttf.dll.a")
+    SET(SDL2_TTF_INCLUDE_DIR "c:/tools/cygwin/usr/include/SDL2")
+    SET(SDL2_IMAGE_LIBRARY "c:/tools/cygwin/lib/libSDL2_image.dll.a")
+    SET(SDL2_IMAGE_INCLUDE_DIR "c:/tools/cygwin/usr/include/SDL2")
+ENDIF()
+
 FIND_PACKAGE(SDL2 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+
 FIND_PACKAGE(SDL2_ttf REQUIRED)
 FIND_PACKAGE(SDL2_image REQUIRED)
 
