@@ -12,11 +12,16 @@ class MainView : public View {
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
         void handleResize(SDL_Surface* screen);
+        void setCamera(const Basis& newCamera);
+        Basis getCamera() const;
     private:
         SDL_Rect boundaryMainView;
         MoonView moonView;
         InfoView infoView;
 		NavView navView;
+        Basis camera;
 };
+
+
 
 #endif // MAIN_VIEW_H_INCLUDED

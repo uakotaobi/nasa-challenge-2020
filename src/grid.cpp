@@ -46,7 +46,7 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
     const double focalDistance = 24;
     // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
     // Growing this rectangle zooms the camera out.
-    const SDL_Rect screenRect = {-100, -100, 200, 200};
+    const SDL_Rect screenRect = {-100, -200, 200, 200};
 
     const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
     const Matrix megaMatrix = projectionMatrix * cameraMatrix;
@@ -62,7 +62,7 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
             continue;
         }
 
-        // Transfrom p from world space to camera space.
+        // Transform p from world space to camera space.
         // Then transform p from camera space to viewport space.
         p = megaMatrix * p;
 
