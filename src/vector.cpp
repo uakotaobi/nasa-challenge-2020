@@ -22,6 +22,14 @@ Point operator+(Vector v, Point p) {
     return Point(p.x+v.x, p.y+v.y, p.z+v.z);
 }
 
+Vector& Vector::operator+=(Vector v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
+    return *this;
+}
+
+
 Vector operator-(Vector v) {
     return Vector(-v.x, -v.y, -v.z);
 }
@@ -30,12 +38,26 @@ Point operator-(Point p, Vector v) {
     return Point(p.x-v.x, p.y-v.y, p.z-v.z);
 }
 
+Vector& Vector::operator-=(Vector v) {
+    x -= v.x;
+    y -= v.y;
+    z -= v.z;
+    return *this;
+}
+
 Vector operator*(Vector v, double f) {
     return Vector(v.x*f, v.y*f, v.z*f);
 }
 
 Vector operator*(double f, Vector v) {
     return Vector(v.x*f, v.y*f, v.z*f);
+}
+
+Vector& Vector::operator*=(double f) {
+    x *= f;
+    y *= f;
+    z *= f;
+    return *this;
 }
 
 Vector operator/(Vector v, double f) {

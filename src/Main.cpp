@@ -94,6 +94,12 @@ int main() {
     MenuView menuView(surf, currentView);
     MainView mainView(surf);
 
+    // Kinematic variables
+    const double accelerationRate = 5; // units/frame
+    Vector velocity(0, 0, 0);
+    const double maxVelocity = 50; // units/frame
+    const double frictionDecay = 0.95; // %velocity per frame;
+
     while (currentView >= 0) {
         redraw = false;
         SDL_Event event;
@@ -112,6 +118,34 @@ int main() {
                         } else if (currentView == 0) {
                             // Break out of menu view (exit the program.)
                             currentView = -1;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_w) {
+                        if (currentView == 1) {
+                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            if (velocity.magnitude() > maxVelocity) {
+                                velocity = normalize(velocity) * maxVelocity;
+                            }
+                            // Basis camera = mainView.getCamera();
+                            // Vector flatAxisZ = camera.axisZ;
+                            // flatAxisZ.y = 0;
+                            // normalize(flatAxisZ);
+                            // camera.center = camera.center + velocity;
+                            // mainView.setCamera(camera);
+                            redraw = true;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_s) {
+                        if (currentView == 1) {
+                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            if (velocity.magnitude() > maxVelocity) {
+                                velocity = normalize(velocity) * -maxVelocity;
+                            }
+                            // Basis camera = mainView.getCamera();
+                            // Vector flatAxisZ = camera.axisZ;
+                            // flatAxisZ.y = 0;
+                            // normalize(flatAxisZ);
+                            // camera.center = camera.center - flatAxisZ*100;
+                            // mainView.setCamera(camera);
+                            redraw = true;
                         }
                     }
                     break;
@@ -139,6 +173,12 @@ int main() {
                     break;
             }
         }
+
+        // Handle camera movement
+        Basis camera = mainView.getCamera();
+        camera.apply(translationMatrix(velocity));
+        mainView.setCamera(camera);
+        velocity *= frictionDecay;
 
         if (redraw) {
             if (currentView == 0) {
