@@ -39,3 +39,6 @@ build/
 
 # Ignore vs code artifacts
 .vscode
+
+# VCXSRV Ignores
+**/config.xlaunch
