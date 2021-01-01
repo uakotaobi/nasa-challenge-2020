@@ -95,10 +95,11 @@ int main() {
     MainView mainView(surf);
 
     // Kinematic variables
-    const double accelerationRate = 5; // units/frame
+    const double accelerationRate = 0.1; // units/frame
+    const double turningRate = 1;         // degrees/frame
     Vector velocity(0, 0, 0);
-    const double maxVelocity = 50; // units/frame
-    const double frictionDecay = 0.95; // %velocity per frame;
+    const double maxVelocity = 50;        // units/frame
+    const double frictionDecay = 0.85;   // %velocity per frame;
 
     while (currentView >= 0) {
         redraw = false;
@@ -125,12 +126,6 @@ int main() {
                             if (velocity.magnitude() > maxVelocity) {
                                 velocity = normalize(velocity) * maxVelocity;
                             }
-                            // Basis camera = mainView.getCamera();
-                            // Vector flatAxisZ = camera.axisZ;
-                            // flatAxisZ.y = 0;
-                            // normalize(flatAxisZ);
-                            // camera.center = camera.center + velocity;
-                            // mainView.setCamera(camera);
                             redraw = true;
                         }
                     } else if (event.key.keysym.sym == SDLK_s) {
@@ -139,18 +134,26 @@ int main() {
                             if (velocity.magnitude() > maxVelocity) {
                                 velocity = normalize(velocity) * -maxVelocity;
                             }
-                            // Basis camera = mainView.getCamera();
-                            // Vector flatAxisZ = camera.axisZ;
-                            // flatAxisZ.y = 0;
-                            // normalize(flatAxisZ);
-                            // camera.center = camera.center - flatAxisZ*100;
-                            // mainView.setCamera(camera);
+                            redraw = true;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_d) {
+                        if (currentView == 1) {
+                            Basis camera = mainView.getCamera();
+                            camera.apply(rotationMatrix(camera.center, camera.center + camera.axisY, turningRate));
+                            mainView.setCamera(camera);
+                            redraw = true;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_a) {
+                        if (currentView == 1) {
+                            Basis camera = mainView.getCamera();
+                            camera.apply(rotationMatrix(camera.center, camera.center + camera.axisY, -turningRate));
+                            mainView.setCamera(camera);
                             redraw = true;
                         }
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.clicks == 1) {
+                    if (event.button.clicks == 1 && currentView == 0) {
                         menuView.handleClicks(event.button);
                     }
                     redraw = true;
