@@ -40,6 +40,16 @@ void Grid::setLatticePoints() {
     }
 }
 
+Plane Grid::gridPlane() const {
+    return Plane(system.center, system.axisY);
+}
+
+Plane Grid::leftPlane() const {
+    // Normal for the leftPlane is -system.axisX.
+    // Grid's center + the leftPlane's normal times 1/2 of the width.
+    return Plane(system.center + -system.axisX * cellSize/2 * columns, -system.axisX);
+}
+
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
     const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
     const Plane cameraPlane = Plane(camera.center, camera.axisZ);
