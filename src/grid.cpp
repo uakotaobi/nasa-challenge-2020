@@ -14,7 +14,7 @@ Grid::Grid() : lattice((49 + 1) * (49 + 1)),
                    setLatticePoints();
 }
 
-Grid::Grid(int rows_, int columns_, double cellSize_)   
+Grid::Grid(int rows_, int columns_, double cellSize_)
     : lattice((rows_ + 1) * (columns_ + 1)),
       system(),
       rows(rows_),
@@ -27,10 +27,10 @@ void Grid::setLatticePoints() {
     Point displacedCenter = system.center;
     displacedCenter.x = system.center.x - (columns / 2.0 * cellSize);
     displacedCenter.z = system.center.z - (rows / 2.0 * cellSize);
-   
+
     for (int row = 0; row <= rows; row += 1) {
         for (int column = 0; column <= columns; column += 1) {
-            int index = (columns + 1) * row + column; 
+            int index = (columns + 1) * row + column;
             GridPoint& gridPoint = lattice[index];
             Point actualLocation = displacedCenter + (column * cellSize * system.axisX) + (row * cellSize * system.axisZ) + (gridPoint.height * system.axisY);
             gridPoint.x = actualLocation.x;
@@ -48,6 +48,24 @@ Plane Grid::leftPlane() const {
     // Normal for the leftPlane is -system.axisX.
     // Grid's center + the leftPlane's normal times 1/2 of the width.
     return Plane(system.center + -system.axisX * cellSize/2 * columns, -system.axisX);
+}
+
+Plane Grid::rightPlane() const {
+    // Normal for the rightPlane is system.axisX.
+    // Grid's center + the rightPlane's normal times 1/2 of the width.
+    return Plane(system.center + system.axisX * cellSize/2 * columns, system.axisX);
+}
+
+Plane Grid::forwardPlane() const {
+    // Normal for the forwardPlane is system.axisZ.
+    // Grid's center + the forwardPlane's normal times 1/2 of the height.
+    return Plane(system.center + system.axisZ * cellSize/2 * rows, system.axisZ);
+}
+
+Plane Grid::backPlane() const {
+    // Normal for the backPlane is -system.axisZ.
+    // Grid's center + the backPlane's normal times 1/2 of the height.
+    return Plane(system.center + -system.axisZ * cellSize/2 * rows, -system.axisZ);
 }
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
@@ -106,7 +124,7 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
                                      currentPoint.color.b,
                                      currentPoint.color.a));
            //std::cout << p << '\n';
-            
+
         } */
 
     }

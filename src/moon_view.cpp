@@ -22,3 +22,7 @@ SDL_Rect MoonView::boundary() const {
 void MoonView::setCamera(const Basis& newCamera) {
     camera = newCamera;
 }
+
+const Grid& MoonView::getGrid() const {
+    return moonGrid;
+}

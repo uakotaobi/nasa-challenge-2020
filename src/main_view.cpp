@@ -39,3 +39,7 @@ void MainView::setCamera(const Basis& newCamera) {
 Basis MainView::getCamera() const {
     return this->camera;
 }
+
+const Grid& MainView::getGrid() const {
+    return moonView.getGrid();
+}

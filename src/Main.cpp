@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include "SDL.h"
 #include "button_view.h"
@@ -11,6 +12,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "plane.h"
+#include "grid.h"
 
 using namespace std;
 
@@ -95,11 +97,14 @@ int main() {
     MainView mainView(surf);
 
     // Kinematic variables
-    const double accelerationRate = 0.1; // units/frame
-    const double turningRate = 1;         // degrees/frame
-    Vector velocity(0, 0, 0);
-    const double maxVelocity = 50;        // units/frame
-    const double frictionDecay = 0.85;   // %velocity per frame;
+    const double accelerationRate = 2;        // units/frame
+    const double angularAccelerationRate = 1; // degrees/frame
+    double currentTurningRate = 0;            // degrees/frame
+    const double maxTurningRate = 1;          // degrees/frame
+    Vector velocity(0, 0, 0);                 // current velocity
+    const double maxVelocity = 50;            // units/frame
+    const double frictionDecay = 0.85;        // %velocity per frame;
+    const double turningFrictionDecay = 0.75; // %velocity per frame;
 
     while (currentView >= 0) {
         redraw = false;
@@ -122,7 +127,7 @@ int main() {
                         }
                     } else if (event.key.keysym.sym == SDLK_w) {
                         if (currentView == 1) {
-                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
                             if (velocity.magnitude() > maxVelocity) {
                                 velocity = normalize(velocity) * maxVelocity;
                             }
@@ -130,7 +135,7 @@ int main() {
                         }
                     } else if (event.key.keysym.sym == SDLK_s) {
                         if (currentView == 1) {
-                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
                             if (velocity.magnitude() > maxVelocity) {
                                 velocity = normalize(velocity) * -maxVelocity;
                             }
@@ -138,16 +143,12 @@ int main() {
                         }
                     } else if (event.key.keysym.sym == SDLK_d) {
                         if (currentView == 1) {
-                            Basis camera = mainView.getCamera();
-                            camera.apply(rotationMatrix(camera.center, camera.center + camera.axisY, turningRate));
-                            mainView.setCamera(camera);
+                            currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
                             redraw = true;
                         }
                     } else if (event.key.keysym.sym == SDLK_a) {
                         if (currentView == 1) {
-                            Basis camera = mainView.getCamera();
-                            camera.apply(rotationMatrix(camera.center, camera.center + camera.axisY, -turningRate));
-                            mainView.setCamera(camera);
+                            currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
                             redraw = true;
                         }
                     }
@@ -179,10 +180,14 @@ int main() {
 
         // Handle camera movement
         Basis camera = mainView.getCamera();
-        camera.apply(translationMatrix(velocity));
+        camera.apply(translationMatrix(velocity) * rotationMatrix(camera.center, camera.center + camera.axisY, currentTurningRate));
         mainView.setCamera(camera);
         velocity *= frictionDecay;
-
+        currentTurningRate *= turningFrictionDecay;
+        // Animate sliding / turning
+        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0) {
+            redraw = true;
+        }
         if (redraw) {
             if (currentView == 0) {
                 menuView.draw(surf);
