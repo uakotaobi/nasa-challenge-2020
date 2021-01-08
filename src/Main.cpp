@@ -16,6 +16,19 @@
 
 using namespace std;
 
+Basis detectCollision(Basis camera, Vector velocity, const Grid& grid) {
+    auto planes = {
+        grid.leftPlane(),
+        grid.rightPlane(),
+        grid.forwardPlane(),
+        grid.backPlane()
+    };
+    for (Plane p : planes) {
+        point futureLocation = camera.center + velocity;
+        
+    }
+}
+
 void debugPrint() {
     double focalDistance = 60;
     SDL_Rect screenRect = {-100, -100, 200, 200};
@@ -180,6 +193,7 @@ int main() {
 
         // Handle camera movement
         Basis camera = mainView.getCamera();
+        camera = detectCollision(camera, velocity, mainView.getGrid());
         camera.apply(translationMatrix(velocity) * rotationMatrix(camera.center, camera.center + camera.axisY, currentTurningRate));
         mainView.setCamera(camera);
         velocity *= frictionDecay;

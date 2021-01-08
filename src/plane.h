@@ -4,6 +4,10 @@
 #include "vector.h"
 #include "point.h"
 
+// A plane is the locus of points that solve the equation Ax + By + Cz + D = 0
+// A plane is flat, 2d, and infinite. Planes define a vector called a normal.
+// Normals are perpandicular to planes, and they point away from them.
+
 struct Plane {
     double A;
     double B;
