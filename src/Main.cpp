@@ -16,6 +16,8 @@
 
 using namespace std;
 
+// Checking if the camera has left the grid.
+// Returns the new repositioned camera.
 Basis detectCollision(Basis camera, Vector velocity, const Grid& grid) {
     auto planes = {
         grid.leftPlane(),
@@ -23,9 +25,13 @@ Basis detectCollision(Basis camera, Vector velocity, const Grid& grid) {
         grid.forwardPlane(),
         grid.backPlane()
     };
+    
+    Point futureLocation = camera.center + velocity;
+    
     for (Plane p : planes) {
-        point futureLocation = camera.center + velocity;
-        
+        if (p.whichSide(futureLocation)) {
+            
+        }
     }
 }
 
