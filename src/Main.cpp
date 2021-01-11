@@ -17,22 +17,24 @@
 using namespace std;
 
 // Checking if the camera has left the grid.
-// Returns the new repositioned camera.
-Basis detectCollision(Basis camera, Vector velocity, const Grid& grid) {
+// Returns the velocity vector that will be used for movement.
+Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
     auto planes = {
         grid.leftPlane(),
         grid.rightPlane(),
         grid.forwardPlane(),
         grid.backPlane()
     };
-    
+
     Point futureLocation = camera.center + velocity;
-    
+
     for (Plane p : planes) {
-        if (p.whichSide(futureLocation)) {
-            
+        if (p.whichSide(futureLocation) > 0) {
+            // Outside of boundaries
+            return Vector(0, 0, 0);
         }
     }
+    return velocity;
 }
 
 void debugPrint() {
@@ -199,8 +201,9 @@ int main() {
 
         // Handle camera movement
         Basis camera = mainView.getCamera();
-        camera = detectCollision(camera, velocity, mainView.getGrid());
-        camera.apply(translationMatrix(velocity) * rotationMatrix(camera.center, camera.center + camera.axisY, currentTurningRate));
+        Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
+        velocity = momentaryVelocity;
+        camera.apply(translationMatrix(momentaryVelocity) * rotationMatrix(camera.center, camera.center + camera.axisY, currentTurningRate));
         mainView.setCamera(camera);
         velocity *= frictionDecay;
         currentTurningRate *= turningFrictionDecay;

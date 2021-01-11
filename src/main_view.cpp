@@ -9,8 +9,8 @@ MainView::MainView(SDL_Surface* screen)
 
     // Move the camera so it's above the grid and tilted down towards the grid.
     camera = Basis();
-    Matrix translationMatrix = ::translationMatrix(Vector(0, 400, 0));
-    Matrix rotationMatrix = ::rotationMatrix(camera.center, camera.center + camera.axisX, 75);
+    Matrix translationMatrix = ::translationMatrix(Vector(0, 100, 0));
+    Matrix rotationMatrix = ::rotationMatrix(camera.center, camera.center + camera.axisX, 1);
     camera.apply(rotationMatrix * translationMatrix);
     this->setCamera(camera);
 }
