@@ -40,6 +40,6 @@ Basis MainView::getCamera() const {
     return this->camera;
 }
 
-const Grid& MainView::getGrid() const {
+Grid& MainView::getGrid() {
     return moonView.getGrid();
 }

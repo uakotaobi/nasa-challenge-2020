@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 #include "SDL.h"
 #include "button_view.h"
@@ -126,6 +127,13 @@ int main() {
     const double maxVelocity = 50;            // units/frame
     const double frictionDecay = 0.85;        // %velocity per frame;
     const double turningFrictionDecay = 0.75; // %velocity per frame;
+
+    mainView.getGrid().setHeightByFunction([] (double x_, double y_) {
+        double x = x_ * 20 - 10;
+        double y = y_ * 20 - 10;
+        double z = sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y));
+        return z;
+    });
 
     while (currentView >= 0) {
         redraw = false;

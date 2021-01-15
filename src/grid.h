@@ -2,6 +2,8 @@
 #define GRID_H_INCLUDED
 
 #include <vector>
+#include <functional>
+
 #include "SDL.h"
 #include "point.h"
 #include "vector.h"
@@ -50,12 +52,17 @@ class Grid {
         // Returns a plane that is on the forward side of the bounding box.
         Plane forwardPlane() const;
 
+        void setHeightByFunction(std::function<double(double, double)> zCoordinateFunc,
+                                 std::function<SDL_Color(double, double)> colorFunc = [] (double x, double y) {
+                                     return SDL_Color{255, 255, 255, 255};
+                                 });
     private:
         std::vector<GridPoint> lattice;
         Basis system;
         int rows, columns;
         double cellSize;
         void setLatticePoints();
+
 
 
 };

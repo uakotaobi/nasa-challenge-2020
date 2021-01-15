@@ -40,6 +40,23 @@ void Grid::setLatticePoints() {
     }
 }
 
+void Grid::setHeightByFunction(std::function<double(double,double)> zCoordinateFunc,
+                               std::function<SDL_Color(double, double)> colorFunc) {
+    // zCoordinateFunc takes normalized coordinates
+    setLatticePoints();
+    int index = 0;
+    for (double y = 0; y < 1; y += 1/(rows + 1)) {
+        for (double x = 0; x < 1; x += 1/(columns + 1)) {
+            double z = zCoordinateFunc(x, y);
+            SDL_Color a = colorFunc(x, y);
+            GridPoint& gridPoint = lattice.at(index);
+            gridPoint.y = z;
+            gridPoint.color = a;
+            index++;
+        }
+    }
+}
+
 Plane Grid::gridPlane() const {
     return Plane(system.center, system.axisY);
 }

@@ -23,6 +23,6 @@ void MoonView::setCamera(const Basis& newCamera) {
     camera = newCamera;
 }
 
-const Grid& MoonView::getGrid() const {
+Grid& MoonView::getGrid() {
     return moonGrid;
 }

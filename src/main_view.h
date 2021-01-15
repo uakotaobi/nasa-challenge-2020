@@ -14,7 +14,7 @@ class MainView : public View {
         void handleResize(SDL_Surface* screen);
         void setCamera(const Basis& newCamera);
         Basis getCamera() const;
-        const Grid& getGrid() const;
+        Grid& getGrid();
     private:
         SDL_Rect boundaryMainView;
         MoonView moonView;
