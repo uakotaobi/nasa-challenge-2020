@@ -133,7 +133,7 @@ int main() {
         double x = x_ * 20 - 10;
         double y = y_ * 20 - 10;
         double z = sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y));
-        z = z * mainView.getGrid().cellSize() * sqrt(mainView.getGrid().rows() * mainView.getGrid().columns());
+        z = z * mainView.getGrid().cellSize() * sqrt(mainView.getGrid().rows() * mainView.getGrid().columns()) * .5;
         return z;
     }, [] (double x_, double y_) {
         uint8_t x = static_cast<uint8_t>(x_ * 255);
@@ -163,7 +163,7 @@ int main() {
                         }
                     } else if (event.key.keysym.sym == SDLK_w) {
                         if (currentView == 1) {
-                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
                             if (velocity.magnitude() > maxVelocity) {
                                 velocity = normalize(velocity) * maxVelocity;
                             }
@@ -171,7 +171,7 @@ int main() {
                         }
                     } else if (event.key.keysym.sym == SDLK_s) {
                         if (currentView == 1) {
-                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
                             if (velocity.magnitude() > maxVelocity) {
                                 velocity = normalize(velocity) * -maxVelocity;
                             }

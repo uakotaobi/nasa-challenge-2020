@@ -115,13 +115,19 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
         // std::cout << p << '\n';
 
         // Is the point behind the camera? If so, get rid of it.
-        if (cameraPlane.whichSide(p) < 0) {
-            continue;
-        }
+        // if (cameraPlane.whichSide(p) < 0) {
+        //     continue;
+        // }
 
         // Transform p from world space to camera space.
         // Then transform p from camera space to viewport space.
-        p = megaMatrix * p;
+        // p = megaMatrix * p;
+
+        p = cameraMatrix * p;
+        if (p.z < 0) {
+            continue;
+        }
+        p = projectionMatrix * p;
 
         // Any point out of bounds of the view rectangle is skipped.
         if (p.x < viewPortRect.x ||
