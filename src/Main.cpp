@@ -129,10 +129,11 @@ int main() {
     const double turningFrictionDecay = 0.75; // %velocity per frame;
 
     // sombrero. Ole!
-    mainView.getGrid().setHeightByFunction([] (double x_, double y_) {
+    mainView.getGrid().setHeightByFunction([&mainView] (double x_, double y_) {
         double x = x_ * 20 - 10;
         double y = y_ * 20 - 10;
         double z = sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y));
+        z = z * mainView.getGrid().cellSize() * sqrt(mainView.getGrid().rows() * mainView.getGrid().columns());
         return z;
     }, [] (double x_, double y_) {
         uint8_t x = static_cast<uint8_t>(x_ * 255);
