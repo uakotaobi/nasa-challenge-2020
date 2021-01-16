@@ -128,6 +128,7 @@ int main() {
     const double frictionDecay = 0.85;        // %velocity per frame;
     const double turningFrictionDecay = 0.75; // %velocity per frame;
 
+    // sombrero. Ole!
     mainView.getGrid().setHeightByFunction([] (double x_, double y_) {
         double x = x_ * 20 - 10;
         double y = y_ * 20 - 10;

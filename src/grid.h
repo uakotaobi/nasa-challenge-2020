@@ -32,6 +32,16 @@ class Grid {
         // - cellSize: the space between grid cells according to the grid's own basis
         Grid(int rows, int columns, double cellSize = 1.0 );
 
+        // Gets the number of divsisions of the grid in the system.axisZ direction.
+        double rows() const;
+
+        // Gets the number of divisions of the grid in the system.axisX direction.
+        double columns() const;
+
+        // Gets the distance between adjacent gridpoints.
+        double cellSize() const;
+
+
         // Have 3D grid points displayed in 2D
         void render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera);
 
@@ -52,6 +62,8 @@ class Grid {
         // Returns a plane that is on the forward side of the bounding box.
         Plane forwardPlane() const;
 
+        // Takes a function f(x,y) that returns a height z and applies that height to each of the respective points in the grid.
+        // Also applies colors to each respective point in the grid.
         void setHeightByFunction(std::function<double(double, double)> zCoordinateFunc,
                                  std::function<SDL_Color(double, double)> colorFunc = [] (double x, double y) {
                                      return SDL_Color{255, 255, 255, 255};
@@ -59,8 +71,8 @@ class Grid {
     private:
         std::vector<GridPoint> lattice;
         Basis system;
-        int rows, columns;
-        double cellSize;
+        int rows_, columns_;
+        double cellSize_;
         void setLatticePoints();
 
 

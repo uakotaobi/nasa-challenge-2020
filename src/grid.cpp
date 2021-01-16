@@ -8,31 +8,31 @@ GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, doubl
 
 Grid::Grid() : lattice((49 + 1) * (49 + 1)),
                system(),
-               rows(49),
-               columns(49),
-               cellSize(1) {
+               rows_(49),
+               columns_(49),
+               cellSize_(1) {
                    setLatticePoints();
 }
 
 Grid::Grid(int rows_, int columns_, double cellSize_)
     : lattice((rows_ + 1) * (columns_ + 1)),
       system(),
-      rows(rows_),
-      columns(columns_),
-      cellSize(cellSize_) {
+      rows_(rows_),
+      columns_(columns_),
+      cellSize_(cellSize_) {
     setLatticePoints();
 }
 
 void Grid::setLatticePoints() {
     Point displacedCenter = system.center;
-    displacedCenter.x = system.center.x - (columns / 2.0 * cellSize);
-    displacedCenter.z = system.center.z - (rows / 2.0 * cellSize);
+    displacedCenter.x = system.center.x - (columns_ / 2.0 * cellSize_);
+    displacedCenter.z = system.center.z - (rows_ / 2.0 * cellSize_);
 
-    for (int row = 0; row <= rows; row += 1) {
-        for (int column = 0; column <= columns; column += 1) {
-            int index = (columns + 1) * row + column;
+    for (int row = 0; row <= rows_; row += 1) {
+        for (int column = 0; column <= columns_; column += 1) {
+            int index = (columns_ + 1) * row + column;
             GridPoint& gridPoint = lattice[index];
-            Point actualLocation = displacedCenter + (column * cellSize * system.axisX) + (row * cellSize * system.axisZ) + (gridPoint.height * system.axisY);
+            Point actualLocation = displacedCenter + (column * cellSize_ * system.axisX) + (row * cellSize_ * system.axisZ) + (gridPoint.height * system.axisY);
             gridPoint.x = actualLocation.x;
             gridPoint.y = actualLocation.y;
             gridPoint.z = actualLocation.z;
@@ -45,8 +45,8 @@ void Grid::setHeightByFunction(std::function<double(double,double)> zCoordinateF
     // zCoordinateFunc takes normalized coordinates
     setLatticePoints();
     int index = 0;
-    for (double y = 0; y < 1; y += 1/(rows + 1)) {
-        for (double x = 0; x < 1; x += 1/(columns + 1)) {
+    for (double y = 0; y <= 1; y += 1.0/(rows_)) {
+        for (double x = 0; x <= 1; x += 1.0/(columns_)) {
             double z = zCoordinateFunc(x, y);
             SDL_Color a = colorFunc(x, y);
             GridPoint& gridPoint = lattice.at(index);
@@ -57,6 +57,18 @@ void Grid::setHeightByFunction(std::function<double(double,double)> zCoordinateF
     }
 }
 
+double Grid::rows() const {
+    return rows_;
+}
+
+double Grid::columns() const {
+    return columns_;
+}
+
+double Grid::cellSize() const {
+    return cellSize_;
+}
+
 Plane Grid::gridPlane() const {
     return Plane(system.center, system.axisY);
 }
@@ -64,25 +76,25 @@ Plane Grid::gridPlane() const {
 Plane Grid::leftPlane() const {
     // Normal for the leftPlane is -system.axisX.
     // Grid's center + the leftPlane's normal times 1/2 of the width.
-    return Plane(system.center + -system.axisX * cellSize/2 * columns, -system.axisX);
+    return Plane(system.center + -system.axisX * cellSize_/2 * columns_, -system.axisX);
 }
 
 Plane Grid::rightPlane() const {
     // Normal for the rightPlane is system.axisX.
     // Grid's center + the rightPlane's normal times 1/2 of the width.
-    return Plane(system.center + system.axisX * cellSize/2 * columns, system.axisX);
+    return Plane(system.center + system.axisX * cellSize_/2 * columns_, system.axisX);
 }
 
 Plane Grid::forwardPlane() const {
     // Normal for the forwardPlane is system.axisZ.
     // Grid's center + the forwardPlane's normal times 1/2 of the height.
-    return Plane(system.center + system.axisZ * cellSize/2 * rows, system.axisZ);
+    return Plane(system.center + system.axisZ * cellSize_/2 * rows_, system.axisZ);
 }
 
 Plane Grid::backPlane() const {
     // Normal for the backPlane is -system.axisZ.
     // Grid's center + the backPlane's normal times 1/2 of the height.
-    return Plane(system.center + -system.axisZ * cellSize/2 * rows, -system.axisZ);
+    return Plane(system.center + -system.axisZ * cellSize_/2 * rows_, -system.axisZ);
 }
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
