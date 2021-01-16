@@ -133,6 +133,11 @@ int main() {
         double y = y_ * 20 - 10;
         double z = sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y));
         return z;
+    }, [] (double x_, double y_) {
+        uint8_t x = static_cast<uint8_t>(x_ * 255);
+        uint8_t y = static_cast<uint8_t>(y_ * 255);
+        uint8_t squarert = static_cast<uint8_t>(sqrt(x_ * y_) * 255);
+        return SDL_Color{x, y, squarert, 255};
     });
 
     while (currentView >= 0) {
