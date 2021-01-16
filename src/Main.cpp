@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <cmath>
 
 #include "SDL.h"
 #include "button_view.h"
@@ -11,8 +13,30 @@
 #include "vector.h"
 #include "matrix.h"
 #include "plane.h"
+#include "grid.h"
 
 using namespace std;
+
+// Checking if the camera has left the grid.
+// Returns the velocity vector that will be used for movement.
+Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
+    auto planes = {
+        grid.leftPlane(),
+        grid.rightPlane(),
+        grid.forwardPlane(),
+        grid.backPlane()
+    };
+
+    Point futureLocation = camera.center + velocity;
+
+    for (Plane p : planes) {
+        if (p.whichSide(futureLocation) > 0) {
+            // Outside of boundaries
+            return Vector(0, 0, 0);
+        }
+    }
+    return velocity;
+}
 
 void debugPrint() {
     double focalDistance = 60;
@@ -94,6 +118,30 @@ int main() {
     MenuView menuView(surf, currentView);
     MainView mainView(surf);
 
+    // Kinematic variables
+    const double accelerationRate = 2;        // units/frame
+    const double angularAccelerationRate = 1; // degrees/frame
+    double currentTurningRate = 0;            // degrees/frame
+    const double maxTurningRate = 1;          // degrees/frame
+    Vector velocity(0, 0, 0);                 // current velocity
+    const double maxVelocity = 50;            // units/frame
+    const double frictionDecay = 0.85;        // %velocity per frame;
+    const double turningFrictionDecay = 0.75; // %velocity per frame;
+
+    // sombrero. Ole!
+    mainView.getGrid().setHeightByFunction([&mainView] (double x_, double y_) {
+        double x = x_ * 20 - 10;
+        double y = y_ * 20 - 10;
+        double z = sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y));
+        z = z * mainView.getGrid().cellSize() * sqrt(mainView.getGrid().rows() * mainView.getGrid().columns());
+        return z;
+    }, [] (double x_, double y_) {
+        uint8_t x = static_cast<uint8_t>(x_ * 255);
+        uint8_t y = static_cast<uint8_t>(y_ * 255);
+        uint8_t squarert = static_cast<uint8_t>(sqrt(x_ * y_) * 255);
+        return SDL_Color{x, y, squarert, 255};
+    });
+
     while (currentView >= 0) {
         redraw = false;
         SDL_Event event;
@@ -113,10 +161,36 @@ int main() {
                             // Break out of menu view (exit the program.)
                             currentView = -1;
                         }
+                    } else if (event.key.keysym.sym == SDLK_w) {
+                        if (currentView == 1) {
+                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            if (velocity.magnitude() > maxVelocity) {
+                                velocity = normalize(velocity) * maxVelocity;
+                            }
+                            redraw = true;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_s) {
+                        if (currentView == 1) {
+                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
+                            if (velocity.magnitude() > maxVelocity) {
+                                velocity = normalize(velocity) * -maxVelocity;
+                            }
+                            redraw = true;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_d) {
+                        if (currentView == 1) {
+                            currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+                            redraw = true;
+                        }
+                    } else if (event.key.keysym.sym == SDLK_a) {
+                        if (currentView == 1) {
+                            currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+                            redraw = true;
+                        }
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.clicks == 1) {
+                    if (event.button.clicks == 1 && currentView == 0) {
                         menuView.handleClicks(event.button);
                     }
                     redraw = true;
@@ -140,6 +214,18 @@ int main() {
             }
         }
 
+        // Handle camera movement
+        Basis camera = mainView.getCamera();
+        Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
+        velocity = momentaryVelocity;
+        camera.apply(translationMatrix(momentaryVelocity) * rotationMatrix(camera.center, camera.center + camera.axisY, currentTurningRate));
+        mainView.setCamera(camera);
+        velocity *= frictionDecay;
+        currentTurningRate *= turningFrictionDecay;
+        // Animate sliding / turning
+        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0) {
+            redraw = true;
+        }
         if (redraw) {
             if (currentView == 0) {
                 menuView.draw(surf);

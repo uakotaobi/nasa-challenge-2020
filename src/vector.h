@@ -14,6 +14,11 @@ struct Vector {
     Vector(Point p);
 
 	double magnitude() const;
+
+    Vector& operator*=(double f);
+    Vector& operator+=(Vector v);
+    Vector& operator-=(Vector v);
+
     friend Point operator+(Point p, Vector v);
     friend Point operator+(Vector v, Point p);
     friend Vector operator-(Vector v);
