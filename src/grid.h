@@ -32,6 +32,9 @@ class Grid {
         // - cellSize: the space between grid cells according to the grid's own basis
         Grid(int rows, int columns, double cellSize = 1.0 );
 
+
+        Basis system() const;
+
         // Gets the number of divsisions of the grid in the system.axisZ direction.
         double rows() const;
 
@@ -70,7 +73,7 @@ class Grid {
                                  });
     private:
         std::vector<GridPoint> lattice;
-        Basis system;
+        Basis system_;
         int rows_, columns_;
         double cellSize_;
         void setLatticePoints();

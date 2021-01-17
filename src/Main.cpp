@@ -112,6 +112,8 @@ int main() {
     }
 
     bool redraw;
+    int previousMouseX = -1;
+    int previousMouseY = -1;
 
     // Create views that user will see
     int currentView = 0;
@@ -209,6 +211,23 @@ int main() {
                     }
                     break;
                 case SDL_MOUSEMOTION:
+                    {
+                        double deltaX = event.button.x - previousMouseX;
+                        double deltaY = event.button.y - previousMouseY;
+                        const double maxDegreesPerFrame = 500;
+                        double thetaX = (deltaX/surf->w) * maxDegreesPerFrame;
+                        double thetaY = (deltaY/surf->h) * maxDegreesPerFrame;
+                        cout << "thetaX = " << thetaX << ", thetaY = " << thetaY << "\n";
+
+                        Basis camera = mainView.getCamera();
+                        Matrix xRotationMatrix = rotationMatrix(camera.center, camera.center + camera.axisX, thetaX * 0);
+                        Matrix yRotationMatrix = rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaY);
+                        camera.apply(yRotationMatrix * xRotationMatrix);
+                        mainView.setCamera(camera);
+                        previousMouseX = event.button.x;
+                        previousMouseY = event.button.y;
+                        
+                    }
                     redraw = true;
                     break;
             }
