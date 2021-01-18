@@ -114,6 +114,9 @@ int main() {
     bool redraw;
     int previousMouseX = -1;
     int previousMouseY = -1;
+    double altitude = 0;       // Angle from the horizon to the camera axis
+    double azimuth = 0;        // Amount of rotation around the grid's YAxis
+    const double pixelsToDegrees = 0.1;
 
     // Create views that user will see
     int currentView = 0;
@@ -214,16 +217,35 @@ int main() {
                     {
                         double deltaX = event.button.x - previousMouseX;
                         double deltaY = event.button.y - previousMouseY;
-                        const double maxDegreesPerFrame = 500;
-                        double thetaX = (deltaX/surf->w) * maxDegreesPerFrame;
-                        double thetaY = (deltaY/surf->h) * maxDegreesPerFrame;
-                        cout << "thetaX = " << thetaX << ", thetaY = " << thetaY << "\n";
+                        double thetaX = (deltaY) * pixelsToDegrees;
+                        double thetaY = (deltaX) * pixelsToDegrees;
+                        cout.precision(6);
 
-                        Basis camera = mainView.getCamera();
-                        Matrix xRotationMatrix = rotationMatrix(camera.center, camera.center + camera.axisX, thetaX * 0);
-                        Matrix yRotationMatrix = rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaY);
-                        camera.apply(yRotationMatrix * xRotationMatrix);
-                        mainView.setCamera(camera);
+                        // Basis camera = mainView.getCamera();
+                        // Matrix xRotationMatrix = rotationMatrix(camera.center, camera.center + camera.axisX, thetaX * 0);
+                        // Matrix yRotationMatrix = rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaY);
+                        // camera.apply(yRotationMatrix * xRotationMatrix);  
+                        // mainView.setCamera(camera); 
+                        
+                        auto mod = [] (double a, double n) {
+                            return a - floor(a/n) * n;
+                        };
+                        auto signed_delta = [&mod] (double source_angle, double target_angle) {
+                            double delta = target_angle - source_angle;  // Figure out the angle
+                            delta = mod(delta + 180, 360) - 180;         // Make sure it's always the smaller of the two possible angles
+                            return delta;
+                        };
+                        // azimuth += signed_delta(azimuth, azimuth + thetaY);
+                        // altitude += signed_delta(altitude, altitude + thetaX);
+                        azimuth = azimuth + thetaY;
+                        if (azimuth > 360) {
+                            azimuth -= 360;
+                        }
+                        if (azimuth < 0) {
+                            azimuth += 360;
+                        }
+                        cout << "azimuth = " << azimuth << ", altitude = " << altitude << ", deltaX = " << deltaX << ", deltaY = " << deltaY << "\n";
+                        
                         previousMouseX = event.button.x;
                         previousMouseY = event.button.y;
                         
@@ -237,8 +259,11 @@ int main() {
         Basis camera = mainView.getCamera();
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
         velocity = momentaryVelocity;
-        camera.apply(translationMatrix(momentaryVelocity) * rotationMatrix(camera.center, camera.center + camera.axisY, currentTurningRate));
+        camera.apply(translationMatrix(momentaryVelocity));
+        Basis backupCamera = camera;
+        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, azimuth));
         mainView.setCamera(camera);
+        
         velocity *= frictionDecay;
         currentTurningRate *= turningFrictionDecay;
         // Animate sliding / turning
@@ -250,6 +275,10 @@ int main() {
                 menuView.draw(surf);
             } else if (currentView == 1) {
                 mainView.draw(surf);
+                
+                // Restore the camera, pre-rotation
+                camera = backupCamera;
+                mainView.setCamera(camera);
             }
 
             SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
