@@ -38,6 +38,12 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
     return velocity;
 }
 
+double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) {
+     absoluteAxisY = normalize(absoluteAxisY);
+     cameraDirection = normalize(cameraDirection);
+     return acos(dotProduct(absoluteAxisY, cameraDirection)) * 180/3.14159;
+}
+
 void debugPrint() {
     double focalDistance = 60;
     SDL_Rect screenRect = {-100, -100, 200, 200};
@@ -114,9 +120,11 @@ int main() {
     bool redraw;
     int previousMouseX = -1;
     int previousMouseY = -1;
-    double altitude = 0;       // Angle from the horizon to the camera axis
-    double azimuth = 0;        // Amount of rotation around the grid's YAxis
-    const double pixelsToDegrees = 0.1;
+    double altitude = 0;                // Angle from the horizon to the camera axis
+    double azimuth = 0;                 // Amount of rotation around the grid's YAxis
+    double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
+    double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
+    const double pixelsToDegrees = .25;   // Mouse's pixel movement to rotation degrees ratio
 
     // Create views that user will see
     int currentView = 0;
@@ -139,7 +147,8 @@ int main() {
         double y = y_ * 20 - 10;
         double z = sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y));
         z = z * mainView.getGrid().cellSize() * sqrt(mainView.getGrid().rows() * mainView.getGrid().columns()) * .5;
-        return z;
+        return 0;
+        // return z;
     }, [] (double x_, double y_) {
         uint8_t x = static_cast<uint8_t>(x_ * 255);
         uint8_t y = static_cast<uint8_t>(y_ * 255);
@@ -149,6 +158,8 @@ int main() {
 
     while (currentView >= 0) {
         redraw = false;
+        thetaTilt = 0;
+        thetaAzimuth = 0;
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -217,16 +228,16 @@ int main() {
                     {
                         double deltaX = event.button.x - previousMouseX;
                         double deltaY = event.button.y - previousMouseY;
-                        double thetaX = (deltaY) * pixelsToDegrees;
-                        double thetaY = (deltaX) * pixelsToDegrees;
+                        thetaTilt = (deltaY) * pixelsToDegrees;
+                        thetaAzimuth = (deltaX) * pixelsToDegrees;
                         cout.precision(6);
 
                         // Basis camera = mainView.getCamera();
-                        // Matrix xRotationMatrix = rotationMatrix(camera.center, camera.center + camera.axisX, thetaX * 0);
-                        // Matrix yRotationMatrix = rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaY);
-                        // camera.apply(yRotationMatrix * xRotationMatrix);  
-                        // mainView.setCamera(camera); 
-                        
+                        // Matrix xRotationMatrix = rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt * 0);
+                        // Matrix yRotationMatrix = rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth);
+                        // camera.apply(yRotationMatrix * xRotationMatrix);
+                        // mainView.setCamera(camera);
+
                         auto mod = [] (double a, double n) {
                             return a - floor(a/n) * n;
                         };
@@ -235,20 +246,21 @@ int main() {
                             delta = mod(delta + 180, 360) - 180;         // Make sure it's always the smaller of the two possible angles
                             return delta;
                         };
-                        // azimuth += signed_delta(azimuth, azimuth + thetaY);
-                        // altitude += signed_delta(altitude, altitude + thetaX);
-                        azimuth = azimuth + thetaY;
+                        // azimuth += signed_delta(azimuth, azimuth + thetaAzimuth);
+                        // altitude += signed_delta(altitude, altitude + thetaTilt);
+                        azimuth = azimuth + thetaAzimuth;
                         if (azimuth > 360) {
                             azimuth -= 360;
                         }
                         if (azimuth < 0) {
                             azimuth += 360;
                         }
-                        cout << "azimuth = " << azimuth << ", altitude = " << altitude << ", deltaX = " << deltaX << ", deltaY = " << deltaY << "\n";
-                        
+                        double currentElevation= calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
+                        cout <<  "thetaAzimuth = " << thetaAzimuth << ", thetaTilt = " << thetaTilt << ", currentElevation = " << currentElevation << "\n";
+
                         previousMouseX = event.button.x;
                         previousMouseY = event.button.y;
-                        
+
                     }
                     redraw = true;
                     break;
@@ -260,10 +272,21 @@ int main() {
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
-        Basis backupCamera = camera;
-        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, azimuth));
+        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
+
+        // DANGER WILL ROBINSON: GIMBAL LOCK
+        // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
+        double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
+        const double maxDeviationFromHorizon = 10;
+        if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
+            thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
+        } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
+            thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
+        }
+        camera.apply(rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt));
+
         mainView.setCamera(camera);
-        
+
         velocity *= frictionDecay;
         currentTurningRate *= turningFrictionDecay;
         // Animate sliding / turning
@@ -275,10 +298,7 @@ int main() {
                 menuView.draw(surf);
             } else if (currentView == 1) {
                 mainView.draw(surf);
-                
-                // Restore the camera, pre-rotation
-                camera = backupCamera;
-                mainView.setCamera(camera);
+
             }
 
             SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
