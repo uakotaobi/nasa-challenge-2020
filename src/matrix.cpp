@@ -1,6 +1,7 @@
-#include "matrix.h"
 #include <iostream>
 #include <cmath>
+
+#include "matrix.h"
 
 using std::sin;
 using std::cos;
@@ -161,13 +162,45 @@ Matrix rotationMatrix(Vector axis, double thetaDeg) {
 
 Matrix rotationMatrix(Point a, Point b, double thetaDeg) {
     // Axis is a vector that point from a to b.
-    // TODO: Firgure out if we need to reverse the axis vector
-    // Should rotate conterclockwise according to the right hand rule
+    // Rotates clockwise, not counterclockwise like the right hand rule
     Vector axis = -(b - a);
     Matrix translateToOrigin = translationMatrix(-Vector(a));
     Matrix translateFromOrigin = translationMatrix(Vector(a));
 
     return translateFromOrigin * rotationMatrix(axis, thetaDeg) * translateToOrigin;
+}
+
+Matrix eulerRotationMatrix(Basis b, double yawDeg, double pitchDeg, double rollDeg) {
+    Matrix translateToOrigin = translationMatrix(-Vector(b.center));
+
+    // Transforms the basis so its axes are mapped to i, j, k.
+    Matrix rigidBodyTransformation(b.axisX.x, b.axisY.x, b.axisZ.x, 0,
+                                   b.axisX.y, b.axisY.y, b.axisZ.y, 0,
+                                   b.axisX.z, b.axisY.z, b.axisZ.z, 0,
+                                   0, 0, 0, 1);
+
+    // Start with Z (roll), then Y (yaw), then X (pitch), for the ZYX Tait-Bryan angle Matrix .
+    // Order is Important with a capital I.
+    double c1 = cos(rollDeg * deg_to_rad);
+    double c2 = cos(yawDeg * deg_to_rad);
+    double c3 = cos(pitchDeg * deg_to_rad);
+    double s1 = sin(rollDeg * deg_to_rad);
+    double s2 = sin(yawDeg * deg_to_rad);
+    double s3 = sin(pitchDeg * deg_to_rad);
+
+    Matrix taitBryanZYX (
+        c1 * c2, c1 * s2 * s3 - c3 * s1, s1 * s3 + c1 * c3 * s2, 0,
+        c2 * s1, c1 * c3 + s1 * s2 * s3, c3 * s1 * s2 - c1 * s3, 0,
+        -s2    , c2 * s3               , c2 * c3               , 0,
+        0      , 0                     , 0                     , 1);
+
+    Matrix inverseRigidBodyTransformation(b.axisX.x, b.axisX.y, b.axisX.z, 0,
+                                          b.axisY.x, b.axisY.y, b.axisY.z, 0,
+                                          b.axisZ.x, b.axisZ.y, b.axisZ.z, 0,
+                                          0, 0, 0, 1);
+
+    Matrix translateFromOrigin = translationMatrix(Vector(b.center));
+    return translateFromOrigin * inverseRigidBodyTransformation * taitBryanZYX * rigidBodyTransformation * translateToOrigin;
 }
 
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect) {
@@ -201,13 +234,10 @@ Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p) {
     X = normalize(X);
     Y = normalize(Y);
     Z = normalize(Z);
+    // Transforms a basis so its axes are mapped to i, j, k.
     Matrix rigidBodyTransformation(X.x, Y.x, Z.x, 0,
                                    X.y, Y.y, Z.y, 0,
                                    X.z, Y.z, Z.z, 0,
                                    0, 0, 0, 1);
-    // Matrix rigidBodyTransformation(X.x, X.y, X.z, 0,
-    //                                Y.x, Y.y, Y.z, 0,
-    //                                Z.x, Z.y, Z.z, 0,
-    //                                0, 0, 0, 1);
     return rigidBodyTransformation * p_to_origin;
 }

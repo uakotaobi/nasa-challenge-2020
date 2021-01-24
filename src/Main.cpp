@@ -45,40 +45,30 @@ double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) 
 }
 
 void debugPrint() {
-    double focalDistance = 60;
-    SDL_Rect screenRect = {-100, -100, 200, 200};
-    SDL_Rect viewPortRect = {0, 0, 1500, 1000};
+    Basis standard;
+    double pitch = 0;
+    double yaw = 0;
+    double roll = 0;
+    Vector i(1, 0, 0);
+    Vector j(0, 1, 0);
+    Vector k(0, 0, 1);
+    standard.apply(translationMatrix(Vector(0, 100, -400)));
+    Matrix m = eulerRotationMatrix(standard, 147.5, 60.5, 0);
+    standard.apply(m);
+    std::cout << "----- \n" << m << "basis form: " << standard << "\n";
+    m = eulerRotationMatrix(standard, 0, 0.25, 0);
+    standard.apply(m);
+    std::cout << "----- \n" << m << "basis form: " << standard << "\n";
+    m = eulerRotationMatrix(standard, -23.75, -21, 0);
+    standard.apply(m);
+    std::cout << "----- \n" << m << "basis form: " << standard << "\n";
+    //std::cout << eulerRotationMatrix(standard, yaw, pitch, roll);
 
-    Vector you_x_axis(-1, 0, 1);
-    Vector you_z_axis(1, 0, 1);
-    Vector you_y_axis(0, 1, 0);
-
-    you_x_axis = normalize(you_x_axis);
-    you_y_axis = normalize(you_y_axis);
-    you_z_axis = normalize(you_z_axis);
-
-    Point you(0, 0, 4);
-    Point that = you + you_x_axis * 100 - you_y_axis * 4 + you_z_axis * 2;
-    std::vector<Point> points = {
-        that,
-        you - you_x_axis * 10 - you_y_axis * 1000000 - you_z_axis * 15,
-        you - you_x_axis * 0 - you_y_axis * 0 - you_z_axis * 0
-    };
-
-    Plane p(you, you_z_axis);
-    for (std::vector<Point>::iterator iter = points.begin(); iter != points.end(); iter++) {
-        std::stringstream s;
-        s << *iter;
-        std::cout.width(40);
-        // std::cout << std::left << s.str() << projectionMatrix(focalDistance, screenRect, viewPortRect) * (*iter) << "\n";
-        std::cout << std::left << s.str() << cameraTransform(you_x_axis, you_y_axis, you_z_axis, you) * (*iter) << ",      " << p.whichSide(*iter) << "\n";
-
-    }
 }
 
 int main() {
-    // debugPrint();
-    // return 0;
+    debugPrint();
+    return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
@@ -120,6 +110,7 @@ int main() {
     bool redraw;
     int previousMouseX = -1;
     int previousMouseY = -1;
+    SDL_GetMouseState(&previousMouseX, &previousMouseY);
     double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
     double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
     const double pixelsToDegrees = .25;   // Mouse's pixel movement to rotation degrees ratio
@@ -223,7 +214,7 @@ int main() {
                     }
                     break;
                 case SDL_MOUSEMOTION:
-                    {
+                    if (currentView != 0) {
                         double deltaX = event.button.x - previousMouseX;
                         double deltaY = event.button.y - previousMouseY;
                         thetaTilt = (deltaY) * pixelsToDegrees;
@@ -231,7 +222,7 @@ int main() {
                         cout.precision(6);
 
                         double currentElevation= calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
-                        cout <<  "thetaAzimuth = " << thetaAzimuth << ", thetaTilt = " << thetaTilt << ", currentElevation = " << currentElevation << "\n";
+                        cout <<  "thetaAzimuth = " << thetaAzimuth << ", thetaTilt = " << thetaTilt << ", currentElevation = " << currentElevation << ", camera " << mainView.getCamera() << "\n";
 
                         previousMouseX = event.button.x;
                         previousMouseY = event.button.y;
@@ -247,18 +238,24 @@ int main() {
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
-        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
+        // camera.apply(/*rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt) */
+        // rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
+
+        camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
+        camera.axisX = normalize(camera.axisX);
+        camera.axisY = normalize(camera.axisY);
+        camera.axisZ = normalize(camera.axisZ);
+
 
         // DANGER WILL ROBINSON: GIMBAL LOCK
         // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
         double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
-        const double maxDeviationFromHorizon = 10;
+        const double maxDeviationFromHorizon = 60;
         if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
             thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
         } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
             thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         }
-        // camera.apply(rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt));
 
         mainView.setCamera(camera);
 

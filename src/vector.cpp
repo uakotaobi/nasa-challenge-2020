@@ -22,6 +22,10 @@ Point operator+(Vector v, Point p) {
     return Point(p.x+v.x, p.y+v.y, p.z+v.z);
 }
 
+Vector operator+(Vector v1, Vector v2) {
+    return Vector(v1.x+v2.x, v1.y+v2.y, v1.z+v2.z);
+}
+
 Vector& Vector::operator+=(Vector v) {
     x += v.x;
     y += v.y;

@@ -1,5 +1,6 @@
 #include "main_view.h"
 #include "asset_manager.h"
+#include "matrix.h"
 
 MainView::MainView(SDL_Surface* screen)
     : moonView (MoonView(SDL_Rect{(screen->w/10),(screen->h/20),(screen->w*2/3),(screen->h*4/5)}, 0, 0)),

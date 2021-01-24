@@ -1,6 +1,7 @@
 #include "grid.h"
 #include "plane.h"
 #include <iostream>
+#include "matrix.h"
 
 GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{255, 255, 255, 255}), temperatureKelvin(0), slopeDeg(0), height(0) {}
 GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, double slopeDeg_, double height_)
@@ -109,13 +110,13 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
     const SDL_Rect screenRect = {-100, -200, 200, 200};
 
     const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
-    
+
     uint32_t* const pixels = static_cast<uint32_t*>(canvas->pixels);
 
     for (const GridPoint& currentPoint: lattice) {
         Point p = currentPoint;
         // std::cout << p << '\n';
-        
+
         p = cameraMatrix * p;
         if (p.z < 0) {
             continue;

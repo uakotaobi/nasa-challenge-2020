@@ -2,10 +2,13 @@
 #define MATRIX_H_INCLUDED
 
 #include <array>
+#include <ostream>
+
+#include "SDL.h"
+
 #include "vector.h"
 #include "point.h"
-#include <ostream>
-#include "SDL.h"
+#include "basis.h"
 
 class Matrix {
     public:
@@ -40,6 +43,12 @@ Matrix rotationMatrix(Vector axis, double thetaDeg);
 
 // Returns a rotation matrix around an arbitrary line.
 Matrix rotationMatrix(Point a, Point b, double thetaDeg);
+
+// Yaw is the angle in degrees around b.axisY (think of it like a door opening).
+// Pitch is the angle in degrees around b.axisX (think of it like a pitcher pouring).
+// Roll is the angle in degrees around b.axisZ (think of it like a cat rolling).
+// This function returns the rotation matrix that rotates the given number of degrees around the given Basis's axes.
+Matrix eulerRotationMatrix(Basis b, double yawDeg, double pitchDeg, double rollDeg);
 
 class SDL_Rect;
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect);
