@@ -113,7 +113,7 @@ int main() {
     SDL_GetMouseState(&previousMouseX, &previousMouseY);
     double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
     double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
-    const double pixelsToDegrees = .25;   // Mouse's pixel movement to rotation degrees ratio
+    const double pixelsToDegrees = .75;   // Mouse's pixel movement to rotation degrees ratio
 
     // Create views that user will see
     int currentView = 0;
