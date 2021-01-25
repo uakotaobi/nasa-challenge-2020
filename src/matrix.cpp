@@ -200,7 +200,7 @@ Matrix eulerRotationMatrix(Basis b, double yawDeg, double pitchDeg, double rollD
                                           0, 0, 0, 1);
 
     Matrix translateFromOrigin = translationMatrix(Vector(b.center));
-    return translateFromOrigin * inverseRigidBodyTransformation * taitBryanZYX * rigidBodyTransformation * translateToOrigin;
+    return translateFromOrigin * /* inverseRigidBodyTransformation */    taitBryanZYX * /* rigidBodyTransformation*/ translateToOrigin;
 }
 
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect) {
