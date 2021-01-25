@@ -67,8 +67,8 @@ void debugPrint() {
 }
 
 int main() {
-    debugPrint();
-    return 0;
+    // debugPrint();
+    // return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
@@ -231,8 +231,8 @@ int main() {
                     redraw = true;
                     break;
             }
-        }
-
+        } // End of event processing.
+     
         // Handle camera movement
         Basis camera = mainView.getCamera();
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());

@@ -174,10 +174,10 @@ Matrix eulerRotationMatrix(Basis b, double yawDeg, double pitchDeg, double rollD
     Matrix translateToOrigin = translationMatrix(-Vector(b.center));
 
     // Transforms the basis so its axes are mapped to i, j, k.
-    Matrix rigidBodyTransformation(b.axisX.x, b.axisY.x, b.axisZ.x, 0,
+    /* Matrix rigidBodyTransformation(b.axisX.x, b.axisY.x, b.axisZ.x, 0,
                                    b.axisX.y, b.axisY.y, b.axisZ.y, 0,
                                    b.axisX.z, b.axisY.z, b.axisZ.z, 0,
-                                   0, 0, 0, 1);
+                                   0, 0, 0, 1); */
 
     // Start with Z (roll), then Y (yaw), then X (pitch), for the ZYX Tait-Bryan angle Matrix .
     // Order is Important with a capital I.
@@ -194,13 +194,13 @@ Matrix eulerRotationMatrix(Basis b, double yawDeg, double pitchDeg, double rollD
         -s2    , c2 * s3               , c2 * c3               , 0,
         0      , 0                     , 0                     , 1);
 
-    Matrix inverseRigidBodyTransformation(b.axisX.x, b.axisX.y, b.axisX.z, 0,
+    /* Matrix inverseRigidBodyTransformation(b.axisX.x, b.axisX.y, b.axisX.z, 0,
                                           b.axisY.x, b.axisY.y, b.axisY.z, 0,
                                           b.axisZ.x, b.axisZ.y, b.axisZ.z, 0,
-                                          0, 0, 0, 1);
+                                          0, 0, 0, 1); */
 
     Matrix translateFromOrigin = translationMatrix(Vector(b.center));
-    return translateFromOrigin * inverseRigidBodyTransformation * taitBryanZYX * rigidBodyTransformation * translateToOrigin;
+    return translateFromOrigin */* inverseRigidBodyTransformation */ taitBryanZYX */* rigidBodyTransformation */ translateToOrigin;
 }
 
 Matrix projectionMatrix(double focalDistance, SDL_Rect screenRect, SDL_Rect viewPortRect) {
