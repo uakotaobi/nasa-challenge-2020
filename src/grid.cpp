@@ -104,10 +104,10 @@ Plane Grid::backPlane() const {
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
     const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
-    const double focalDistance = 24;
+    const double focalDistance = 120;
     // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
     // Growing this rectangle zooms the camera out.
-    const SDL_Rect screenRect = {-100, -200, 200, 200};
+    const SDL_Rect screenRect = {-63, -63, 125, 125};
 
     const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
 

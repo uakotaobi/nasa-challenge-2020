@@ -241,22 +241,22 @@ int main() {
         // camera.apply(/*rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt) */
         // rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
 
-        camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
-        camera.axisX = normalize(camera.axisX);
-        camera.axisY = normalize(camera.axisY);
-        camera.axisZ = normalize(camera.axisZ);
-
 
         // DANGER WILL ROBINSON: GIMBAL LOCK
         // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
         double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
-        const double maxDeviationFromHorizon = 60;
+        const double maxDeviationFromHorizon = 10;
         if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
             thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
         } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
             thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         }
-
+        
+        camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
+        camera.axisX = normalize(camera.axisX);
+        camera.axisY = normalize(camera.axisY);
+        camera.axisZ = normalize(camera.axisZ);
+        
         mainView.setCamera(camera);
 
         velocity *= frictionDecay;
