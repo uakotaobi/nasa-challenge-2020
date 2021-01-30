@@ -10,10 +10,11 @@
 #include "menu_view.h"
 #include "SDL_image.h"
 #include "main_view.h"
-#include "vector.h"
 #include "matrix.h"
 #include "plane.h"
 #include "grid.h"
+#include "common.h"
+#include "vector.h"
 
 using namespace std;
 
@@ -37,11 +38,41 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
     }
     return velocity;
 }
+// Reorients the camera so its vertical direction is equal to the absolute Y-axis
+Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
+    // cout << "absoluteAxisY Magnitude:    " << absoluteAxisY.magnitude() << "    camera.axisY Magnitude:    " << camera.axisY.magnitude() << "\n";
+    absoluteAxisY = normalize(absoluteAxisY);
+    Vector cameraAxisY = normalize(camera.axisY);
+    Point p1 = camera.center;
+    Point p2 = camera.center + cameraAxisY;
+    Point p3 = camera.center + absoluteAxisY;
+    Vector rotationAxis = surfaceNormal(p1, p2, p3);
+    double sinTheta = rotationAxis.magnitude();
+    double thetaDeg = asin(sinTheta) * rad_to_deg;
+
+    // testVector is there so that we don't have to worry about redoing the
+    // rotation multiple times once we get it correct.
+    Vector testVector = cameraAxisY;
+    Matrix m = rotationMatrix(camera.center, camera.center + rotationAxis, thetaDeg);
+    Vector rotatedTestVector = m * testVector;
+
+    if (abs(dotProduct(rotatedTestVector, absoluteAxisY)) < epsilon) {
+        // huzza, rotation was correct
+    } else {
+        // woopsies, the rotation was the wrong direction, we need to flip from positive to negative or vice versa
+        thetaDeg = -thetaDeg;
+        m = rotationMatrix(camera.center, camera.center + rotationAxis, thetaDeg);
+    }
+    cout << thetaDeg << endl;
+    camera.apply(m);
+    return camera;
+
+}
 
 double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) {
      absoluteAxisY = normalize(absoluteAxisY);
      cameraDirection = normalize(cameraDirection);
-     return acos(dotProduct(absoluteAxisY, cameraDirection)) * 180/3.14159;
+     return acos(dotProduct(absoluteAxisY, cameraDirection)) * rad_to_deg;
 }
 
 void debugPrint() {
@@ -219,10 +250,8 @@ int main() {
                         double deltaY = event.button.y - previousMouseY;
                         thetaTilt = (deltaY) * pixelsToDegrees;
                         thetaAzimuth = (deltaX) * pixelsToDegrees;
-                        cout.precision(6);
 
-                        double currentElevation= calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
-                        cout <<  "thetaAzimuth = " << thetaAzimuth << ", thetaTilt = " << thetaTilt << ", currentElevation = " << currentElevation << ", camera " << mainView.getCamera() << "\n";
+                        double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
 
                         previousMouseX = event.button.x;
                         previousMouseY = event.button.y;
@@ -232,7 +261,7 @@ int main() {
                     break;
             }
         } // End of event processing.
-     
+
         // Handle camera movement
         Basis camera = mainView.getCamera();
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
@@ -251,12 +280,13 @@ int main() {
         } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
             thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         }
-        
+
         camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
         camera.axisX = normalize(camera.axisX);
         camera.axisY = normalize(camera.axisY);
         camera.axisZ = normalize(camera.axisZ);
-        
+        camera = unRollCamera(mainView.getGrid().system().axisY, camera);
+
         mainView.setCamera(camera);
 
         velocity *= frictionDecay;

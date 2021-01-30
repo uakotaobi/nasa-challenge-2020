@@ -1,8 +1,7 @@
 #include "vector.h"
 #include <cmath>
 #include <string>
-
-const double epsilon = 0.00001;
+#include "common.h"
 
 Vector::Vector(): x(0), y(0), z(0) { }
 
@@ -88,6 +87,15 @@ Vector crossProduct(Vector v1, Vector v2) {
                   v1.x*v2.y - v1.y*v2.x);
 }
 
+// Better than crossProduct for right triangles
+Vector surfaceNormal(Point p1, Point p2, Point p3) {
+    Vector regularCrossProduct = crossProduct(p2 - p1, p3 - p1);
+    if (abs(regularCrossProduct.magnitude()) < epsilon) {
+        return crossProduct(p1 - p2, p3 - p2);
+    } else {
+        return regularCrossProduct;
+    }
+}
 
 Vector normalize (Vector v) {
     if (v.magnitude()<-epsilon || v.magnitude()>epsilon){

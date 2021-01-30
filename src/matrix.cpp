@@ -2,13 +2,11 @@
 #include <cmath>
 
 #include "matrix.h"
+#include "common.h"
 
 using std::sin;
 using std::cos;
 using std::tan;
-
-const double deg_to_rad = M_PI/180;
-const double epsilon = 1e-9;
 
 Matrix::Matrix() {
     data = {0, 0, 0, 0,

@@ -1,7 +1,6 @@
 #include "plane.h"
 #include <cmath>
-
-const double epsilon = 0.000001;
+#include "common.h"
 
 Plane::Plane() : A (0), B (0), C (1), D (0) {};
 Plane::Plane(double A_, double B_, double C_, double D_) : A (A_), B (B_), C (C_), D (D_) {};
