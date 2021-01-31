@@ -40,33 +40,11 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
 }
 // Reorients the camera so its vertical direction is equal to the absolute Y-axis
 Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
-    // cout << "absoluteAxisY Magnitude:    " << absoluteAxisY.magnitude() << "    camera.axisY Magnitude:    " << camera.axisY.magnitude() << "\n";
-    absoluteAxisY = normalize(absoluteAxisY);
-    Vector cameraAxisY = normalize(camera.axisY);
-    Point p1 = camera.center;
-    Point p2 = camera.center + cameraAxisY;
-    Point p3 = camera.center + absoluteAxisY;
-    Vector rotationAxis = surfaceNormal(p1, p2, p3);
-    double sinTheta = rotationAxis.magnitude();
-    double thetaDeg = asin(sinTheta) * rad_to_deg;
-
-    // testVector is there so that we don't have to worry about redoing the
-    // rotation multiple times once we get it correct.
-    Vector testVector = cameraAxisY;
-    Matrix m = rotationMatrix(camera.center, camera.center + rotationAxis, thetaDeg);
-    Vector rotatedTestVector = m * testVector;
-
-    if (abs(dotProduct(rotatedTestVector, absoluteAxisY)) < epsilon) {
-        // huzza, rotation was correct
-    } else {
-        // woopsies, the rotation was the wrong direction, we need to flip from positive to negative or vice versa
-        thetaDeg = -thetaDeg;
-        m = rotationMatrix(camera.center, camera.center + rotationAxis, thetaDeg);
-    }
-    cout << thetaDeg << endl;
+    double thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
+    double thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
+    Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
     camera.apply(m);
     return camera;
-
 }
 
 double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) {
