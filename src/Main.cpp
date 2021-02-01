@@ -40,8 +40,20 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
 }
 // Reorients the camera so its vertical direction is equal to the absolute Y-axis
 Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
-    double thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
-    double thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
+    double thetaCamera;
+    double thetaAbsoluteAxisY;
+    if (abs(camera.axisY.x) < epsilon && abs(camera.axisY.y) < epsilon) {
+        // camera.axisY just is parallel to the absolute z axis.
+        thetaCamera = atan2(camera.axisY.y, camera.axisY.z) * rad_to_deg;
+        thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.z) * rad_to_deg;
+    } else {
+        // This is our normal case.
+        thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
+        thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
+    }
+    std::cout << "thetaCamera: " << thetaCamera << ", ";
+    std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
+    
     Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
     camera.apply(m);
     return camera;
