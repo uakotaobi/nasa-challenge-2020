@@ -53,7 +53,7 @@ Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
     }
     std::cout << "thetaCamera: " << thetaCamera << ", ";
     std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
-    
+
     Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
     camera.apply(m);
     return camera;
@@ -63,6 +63,37 @@ double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) 
      absoluteAxisY = normalize(absoluteAxisY);
      cameraDirection = normalize(cameraDirection);
      return acos(dotProduct(absoluteAxisY, cameraDirection)) * rad_to_deg;
+}
+
+// Returns a rotation matrix that reorients the given Basis so that its axisY
+// points "up" (i.e., so its axisY is parallel to absoluteAxisY.)
+//
+//              AbsoluteAxisY
+//           |   ,'
+// j (y-axis)|   |
+//           |  ,'
+//           |  |
+//           | ,'
+//           | |        __..--'"
+//           |,'__..--'"   camera.axisY
+// ----------+------------------> i (x-axis)
+//           |
+//
+// atan2(camera.axisY.y, camera.axisY.x) is the angle between the camera's YZ
+// plane and the true XZ plane.
+//
+// atan2(camera.absoluteAxisY.y, camera.absoluteAxisX.x) is the angle between
+// the absolute (read: grid)'s YZ plane and the true XZ plane.
+//
+// Their difference is how much we need to rotate along the camera.axisZ in
+// order to reorient ourselves.
+Matrix correctVerticalOrientation(Vector absoluteAxisY, Basis camera) {
+    double thetaCamera = atan2(camera.axisY.y, camera.axisY.x);
+    double thetaAbsolute = atan2(absoluteAxisY.y, absoluteAxisY.x);
+    const double RADIANS_TO_DEGREES = 180 / 3.141593;
+    return rotationMatrix(camera.center,
+                          camera.center + camera.axisZ,
+                          -RADIANS_TO_DEGREES * (thetaAbsolute - thetaCamera));
 }
 
 void debugPrint() {
@@ -134,7 +165,7 @@ int main() {
     SDL_GetMouseState(&previousMouseX, &previousMouseY);
     double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
     double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
-    const double pixelsToDegrees = .75;   // Mouse's pixel movement to rotation degrees ratio
+    const double pixelsToDegrees = .5;  // Mouse's pixel movement to rotation degrees ratio
 
     // Create views that user will see
     int currentView = 0;
@@ -236,16 +267,17 @@ int main() {
                     break;
                 case SDL_MOUSEMOTION:
                     if (currentView != 0) {
-                        double deltaX = event.button.x - previousMouseX;
-                        double deltaY = event.button.y - previousMouseY;
-                        thetaTilt = (deltaY) * pixelsToDegrees;
-                        thetaAzimuth = (deltaX) * pixelsToDegrees;
+                        if (previousMouseX != -1 || previousMouseY != -1) {
+                            double deltaX = event.button.x - previousMouseX;
+                            double deltaY = event.button.y - previousMouseY;
+                            thetaTilt = (deltaY) * pixelsToDegrees;
+                            thetaAzimuth = (deltaX) * pixelsToDegrees;
 
-                        double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
+                            double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
+                        }
 
                         previousMouseX = event.button.x;
                         previousMouseY = event.button.y;
-
                     }
                     redraw = true;
                     break;
@@ -264,7 +296,7 @@ int main() {
         // DANGER WILL ROBINSON: GIMBAL LOCK
         // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
         double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
-        const double maxDeviationFromHorizon = 10;
+        const double maxDeviationFromHorizon = 45;
         if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
             thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
         } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {

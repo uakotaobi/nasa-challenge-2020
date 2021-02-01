@@ -44,10 +44,16 @@ Matrix rotationMatrix(Vector axis, double thetaDeg);
 // Returns a rotation matrix around an arbitrary line.
 Matrix rotationMatrix(Point a, Point b, double thetaDeg);
 
+// This function returns the rotation matrix that rotates the given number of degrees around the given Basis's axes.
+//
 // Yaw is the angle in degrees around b.axisY (think of it like a door opening).
 // Pitch is the angle in degrees around b.axisX (think of it like a pitcher pouring).
-// Roll is the angle in degrees around b.axisZ (think of it like a cat rolling).
-// This function returns the rotation matrix that rotates the given number of degrees around the given Basis's axes.
+// Roll is the angle in degrees around b.axisZ (think of it like a cat
+// rolling).
+//
+// TODO: Euler angles seem to be based on a fixed coordinate system, rendering
+// the Basis argument meaningless (the basis for all of these rotations is
+// ijk-origin.)  Get rid of the Basis arg -- we're not using it anyway.
 Matrix eulerRotationMatrix(Basis b, double yawDeg, double pitchDeg, double rollDeg);
 
 class SDL_Rect;
