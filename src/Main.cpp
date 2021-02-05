@@ -15,6 +15,7 @@
 #include "grid.h"
 #include "common.h"
 #include "vector.h"
+#include "quaternion.h"
 
 using namespace std;
 
@@ -51,8 +52,7 @@ Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
         thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
         thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
     }
-    std::cout << "thetaCamera: " << thetaCamera << ", ";
-    std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
+    std::cout << "thetaCamera: " << thetaCamera << ", " << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
 
     Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
     camera.apply(m);
@@ -165,7 +165,7 @@ int main() {
     SDL_GetMouseState(&previousMouseX, &previousMouseY);
     double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
     double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
-    const double pixelsToDegrees = .5;  // Mouse's pixel movement to rotation degrees ratio
+    const double pixelsToDegrees = .45;  // Mouse's pixel movement to rotation degrees ratio
 
     // Create views that user will see
     int currentView = 0;
@@ -201,6 +201,13 @@ int main() {
         redraw = false;
         thetaTilt = 0;
         thetaAzimuth = 0;
+
+        if (currentView == 1) {
+            SDL_ShowCursor(SDL_DISABLE);
+        } else {
+            SDL_ShowCursor(SDL_ENABLE);
+        }
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -303,11 +310,24 @@ int main() {
             thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         }
 
-        camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
+        // This just resulted in _worse_ roll instability.  Im actually
+        // surprised at this.
+        //
+        //     camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
+        //     camera.apply(rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt));
+
+        // camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
+
+        Matrix toOrigin = translationMatrix(-Vector(camera.center));
+        Quaternion q1 = rotationQuaternion(mainView.getGrid().system().axisY, thetaAzimuth);
+        Quaternion q2 = rotationQuaternion(camera.axisX, thetaTilt);
+        Matrix fromOrigin = translationMatrix(Vector(camera.center));
+        camera.apply(fromOrigin * rotationMatrix(q2 * q1) * toOrigin);
+
+        camera = unRollCamera(mainView.getGrid().system().axisY, camera);
         camera.axisX = normalize(camera.axisX);
         camera.axisY = normalize(camera.axisY);
         camera.axisZ = normalize(camera.axisZ);
-        camera = unRollCamera(mainView.getGrid().system().axisY, camera);
 
         mainView.setCamera(camera);
 
