@@ -28,3 +28,22 @@ Point Plane::pointOnPlane() const {
         return Point(0, 0, 0);
     }
 }
+
+std::optional<Point> Plane::pointOfIntersection(Point p1, Point p2) const {
+    Vector u = p2 - p1;
+    Vector n = normalVector();
+    if (abs(dotProduct(u, n)) < epsilon) {
+        // They are parallel.
+        return std::nullopt;
+    } else {
+        // They are not parallel so they intersect at p1 + s*(p2 - p1).
+        double s = -(A*p1.x + B*p1.y + C*p1.z + D) / dotProduct(u, n);
+        if (s >= 0 && s <= 1) {
+            // The line segment intersects the plane.
+            return std::optional<Point>(p1 + s*(p2 - p1));
+        } else {
+            // The intersection is outside the line segment
+            return std::nullopt;
+        }
+    }
+}

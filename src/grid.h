@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <tuple>
 
 #include "SDL.h"
 #include "point.h"
@@ -71,6 +72,19 @@ class Grid {
                                  std::function<SDL_Color(double, double)> colorFunc = [] (double x, double y) {
                                      return SDL_Color{255, 255, 255, 255};
                                  });
+
+        // Gets the paramaters of surface interpolation for the given point
+        //
+        // Returns a pair of floating point numbers, u, which is the parameter of interpolation for the row,
+        // and v, which is the parameter of interpolation for the columns
+        //
+        // If the point is at the upper left, it is at (u = 0, v = 0) (elevation doesn't matter)
+        // Lower right = (1, 1)
+        // Upper right = (0, 1)
+        // Lower left = (1, 0)
+        //
+        // Can return valid data for points outside the grid.
+        std::tuple<double, double> gridLocation(Point p) const;
     private:
         std::vector<GridPoint> lattice;
         Basis system_;

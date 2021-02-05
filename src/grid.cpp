@@ -157,4 +157,16 @@ void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
         } */
 
     }
+
+}
+
+std::tuple<double, double> Grid::gridLocation(Point p) const {
+    Plane P = gridPlane();
+    // Guarantees that the ray will hit the grid, no matter how far you are from it;
+    double rayDistance = (distance(system_.center, p) * 2);
+    Point q = p + -P.whichSide(p) * P.normalVector() * rayDistance;
+    auto op = P.pointOfIntersection(p, q);
+    if (op == std::nullopt) {
+        throw std::runtime_error("Internal error: line segment didn't hit plane (Plane.h - 36)");
+    }
 }
