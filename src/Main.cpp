@@ -271,6 +271,7 @@ int main() {
             thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         }
 
+        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
         camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
         camera.axisX = normalize(camera.axisX);
         camera.axisY = normalize(camera.axisY);
