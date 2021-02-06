@@ -75,8 +75,10 @@ class Grid {
 
         // Gets the paramaters of surface interpolation for the given point
         //
-        // Returns a pair of floating point numbers, u, which is the parameter of interpolation for the row,
-        // and v, which is the parameter of interpolation for the columns
+        // Returns a triplet of floating point numbers:
+        // - u, which is the parameter of interpolation for the row.
+        // - v, which is the parameter of interpolation for the columns.
+        // - h, which is the minimum distance of the point from the gridPlane().
         //
         // If the point is at the upper left, it is at (u = 0, v = 0) (elevation doesn't matter)
         // Lower right = (1, 1)
@@ -84,7 +86,15 @@ class Grid {
         // Lower left = (1, 0)
         //
         // Can return valid data for points outside the grid.
-        std::tuple<double, double> gridLocation(Point p) const;
+        std::tuple<double, double, double> gridLocation(Point p) const;
+
+        // Uses averages of the nearest gridpoints to u and v, and determines
+        // where the "floor" should be, even when u and v don't directly
+        // correspond to a gridpoint boundary.
+        //
+        // 0 <= v <= 1
+        // 0 <= u <= 1
+        Point findFloor(double u, double v) const;
     private:
         std::vector<GridPoint> lattice;
         Basis system_;
