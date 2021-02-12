@@ -73,7 +73,7 @@ class Grid {
                                      return SDL_Color{255, 255, 255, 255};
                                  });
 
-        // Gets the paramaters of surface interpolation for the given point
+        // Gets the parameters of surface interpolation for the given point
         //
         // Returns a triplet of floating point numbers:
         // - u, which is the parameter of interpolation for the row.
@@ -88,9 +88,9 @@ class Grid {
         // Can return valid data for points outside the grid.
         std::tuple<double, double, double> gridLocation(Point p) const;
 
-        // Uses averages of the nearest gridpoints to u and v, and determines
+        // Uses averages of the nearest grid points to u and v, and determines
         // where the "floor" should be, even when u and v don't directly
-        // correspond to a gridpoint boundary.
+        // correspond to a grid point boundary.
         //
         // 0 <= v <= 1
         // 0 <= u <= 1

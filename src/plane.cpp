@@ -29,6 +29,8 @@ Point Plane::pointOnPlane() const {
     }
 }
 
+// function was implemented with the following source:
+// https://www.geomalgorithms.com/a05-_intersect-1.html#Line-Plane-Intersection
 std::optional<Point> Plane::pointOfIntersection(Point p1, Point p2) const {
     Vector u = p2 - p1;
     Vector n = normalVector();

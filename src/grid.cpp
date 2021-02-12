@@ -184,6 +184,35 @@ std::tuple<double, double, double> Grid::gridLocation(Point p) const {
 }
 
 Point Grid::findFloor(double u, double v) const {
-    return system_.center + ((u - 0.5) * (rows_ * cellSize_) * normalize(system_.axisZ)) +
-                           ((v - 0.5) * (columns_ * cellSize_) * normalize(system_.axisX));
+    if (u < 0) {
+        u = 0;
+    }
+    if (v < 0) {
+        v = 0;
+    }
+        
+    if (u > 1) {
+        u = 1;
+    }
+    if (v > 1) {
+        v = 1;
+    }
+    
+    double row = u * (rows_ + 1);
+    double column = v * (columns_ + 1);
+    
+    auto index = [this] (int x, int y) {
+        return (this->columns_ + 1) * y + x;
+    };
+    GridPoint ul = lattice.at(index(floor(column), floor(row)));
+    GridPoint ur = lattice.at(index(ceil(column), floor(row))); 
+    GridPoint ll = lattice.at(index(floor(column), ceil(row)));
+    GridPoint lr = lattice.at(index(ceil(column), ceil(row)));
+    
+    Point resultPoint ((ul.x + ur.x + ll.x + lr.x)/4, 
+                       (ul.y + ur.y + ll.y + lr.y)/4,
+                       (ul.z + ur.z + ll.z + lr.z)/4);
+    return resultPoint;                   
+    
 }
+    
