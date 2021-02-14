@@ -204,14 +204,33 @@ Point Grid::findFloor(double u, double v) const {
     auto index = [this] (int x, int y) {
         return (this->columns_ + 1) * y + x;
     };
-    GridPoint ul = lattice.at(index(floor(column), floor(row)));
-    GridPoint ur = lattice.at(index(ceil(column), floor(row))); 
-    GridPoint ll = lattice.at(index(floor(column), ceil(row)));
-    GridPoint lr = lattice.at(index(ceil(column), ceil(row)));
     
-    Point resultPoint ((ul.x + ur.x + ll.x + lr.x)/4, 
-                       (ul.y + ur.y + ll.y + lr.y)/4,
-                       (ul.z + ur.z + ll.z + lr.z)/4);
+    // Calculate the four corners of the current "patch".
+    // Patch is the current grid cell the point (u, v) is in. 
+    GridPoint ul = lattice.at(index(floor(column), floor(row)));
+    const double u_ul = floor(u / rows_) * rows_;
+    const double v_ul = floor(u / columns_) * columns_;
+    
+    GridPoint ur = lattice.at(index(ceil(column), floor(row))); 
+    const double u_ur = floor(u / rows_) * rows_;
+    const double v_ur = ceil(u / columns_) * columns_;
+    
+    GridPoint ll = lattice.at(index(floor(column), ceil(row)));
+    const double u_ll = ceil(u / rows_) * rows_;
+    const double v_ll = floor(u / columns_) * columns_;
+    
+    GridPoint lr = lattice.at(index(ceil(column), ceil(row)));
+    const double u_lr = ceil(u / rows_) * rows_;
+    const double v_lr = ceil(u / columns_) * columns_;
+    
+    // Calculate horizontal parameter of interpolation.
+    const double s = (v - v_ul) / (v_ur - v_ul);
+    
+    // Calculate vertical parameter of interpolation.
+    const double r = (u - u_ul) / (u_ll - u_ul);
+
+    Point resultPoint = ul + (ur - ul) * s + (ll - ul) * r;
+    
     return resultPoint;                   
     
 }
