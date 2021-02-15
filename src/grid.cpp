@@ -168,6 +168,8 @@ std::tuple<double, double, double> Grid::gridLocation(Point p) const {
     auto op = P.pointOfIntersection(p, pointPastPlane);
     if (!op) {
         throw std::runtime_error("Internal error: line segment didn't hit plane.");
+    } else {
+        // std::cout << "Point where gridplane is intersected: " << *op << "\n";
     }
 
     // Calculate the height of p from the gridPlane (P).
@@ -177,9 +179,11 @@ std::tuple<double, double, double> Grid::gridLocation(Point p) const {
     // This will give us a matrix that will transform p into a new point, p'.
     // p' will be used for the parameters of interpolation.
     Point pPrime = cameraTransform(system_.axisX, system_.axisY, system_.axisZ, system_.center) * p;
+    std::cout << "pPrime: " << pPrime << "\n";
+
     double v = pPrime.x / (cellSize_ * (columns_ + 1));
     double u = pPrime.z / (cellSize_ * (rows_ + 1));
-    return std::make_tuple(u, v, h);
+    return std::make_tuple(u + 0.5, v + 0.5, h);
 
 }
 
@@ -190,48 +194,47 @@ Point Grid::findFloor(double u, double v) const {
     if (v < 0) {
         v = 0;
     }
-        
+
     if (u > 1) {
         u = 1;
     }
     if (v > 1) {
         v = 1;
     }
-    
+
     double row = u * (rows_ + 1);
     double column = v * (columns_ + 1);
-    
+
     auto index = [this] (int x, int y) {
         return (this->columns_ + 1) * y + x;
     };
-    
+
     // Calculate the four corners of the current "patch".
-    // Patch is the current grid cell the point (u, v) is in. 
+    // Patch is the current grid cell the point (u, v) is in.
     GridPoint ul = lattice.at(index(floor(column), floor(row)));
     const double u_ul = floor(u / rows_) * rows_;
     const double v_ul = floor(u / columns_) * columns_;
-    
-    GridPoint ur = lattice.at(index(ceil(column), floor(row))); 
+
+    GridPoint ur = lattice.at(index(ceil(column), floor(row)));
     const double u_ur = floor(u / rows_) * rows_;
     const double v_ur = ceil(u / columns_) * columns_;
-    
+
     GridPoint ll = lattice.at(index(floor(column), ceil(row)));
     const double u_ll = ceil(u / rows_) * rows_;
     const double v_ll = floor(u / columns_) * columns_;
-    
+
     GridPoint lr = lattice.at(index(ceil(column), ceil(row)));
     const double u_lr = ceil(u / rows_) * rows_;
     const double v_lr = ceil(u / columns_) * columns_;
-    
+
     // Calculate horizontal parameter of interpolation.
     const double s = (v - v_ul) / (v_ur - v_ul);
-    
+
     // Calculate vertical parameter of interpolation.
     const double r = (u - u_ul) / (u_ll - u_ul);
 
     Point resultPoint = ul + (ur - ul) * s + (ll - ul) * r;
-    
-    return resultPoint;                   
-    
+
+    return resultPoint;
+
 }
-    

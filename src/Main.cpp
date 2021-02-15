@@ -51,12 +51,22 @@ Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
         thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
         thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
     }
-    std::cout << "thetaCamera: " << thetaCamera << ", ";
-    std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
-    
+    // std::cout << "thetaCamera: " << thetaCamera << ", ";
+    // std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
+
     Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
     camera.apply(m);
     return camera;
+}
+
+// Gets the floor point coordinate beneath camera (debugging)
+Point getFloor(Point cameraCenter, const Grid& moonGrid) {
+    auto uvh = moonGrid.gridLocation(cameraCenter);
+    double u = std::get<0>(uvh);
+    double v = std::get<1>(uvh);
+    Point p = moonGrid.findFloor(u, v);
+    std::cout << "Floor Point: " << p << "\t\t\tCamera Center: " << cameraCenter << "\t u: " << u << "\t v: " << v << "\n";
+    return p;
 }
 
 double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) {
@@ -257,6 +267,7 @@ int main() {
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
+        getFloor(camera.center, mainView.getGrid());
         // camera.apply(/*rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt) */
         // rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
 
