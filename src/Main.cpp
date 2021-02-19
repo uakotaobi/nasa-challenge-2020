@@ -52,7 +52,6 @@ Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
         thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
         thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
     }
-    std::cout << "thetaCamera: " << thetaCamera << ", " << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
 
     Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
     camera.apply(m);
@@ -203,7 +202,7 @@ int main() {
         thetaAzimuth = 0;
 
         if (currentView == 1) {
-            SDL_ShowCursor(SDL_DISABLE);
+            // SDL_ShowCursor(SDL_DISABLE);
         } else {
             SDL_ShowCursor(SDL_ENABLE);
         }
@@ -274,17 +273,19 @@ int main() {
                     break;
                 case SDL_MOUSEMOTION:
                     if (currentView != 0) {
-                        if (previousMouseX != -1 || previousMouseY != -1) {
-                            double deltaX = event.button.x - previousMouseX;
-                            double deltaY = event.button.y - previousMouseY;
+                        if ((previousMouseX != -1 || previousMouseY != -1) &&
+                            (event.motion.x >= 0 && event.motion.x < surf->w && event.motion.y >= 0 && event.motion.y < surf->h)) {
+                            double deltaX = event.motion.x - previousMouseX;
+                            double deltaY = event.motion.y - previousMouseY;
                             thetaTilt = (deltaY) * pixelsToDegrees;
                             thetaAzimuth = (deltaX) * pixelsToDegrees;
 
-                            double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
+                            std::cout << "event.motion.x: " << event.motion.x
+                                      << ", event.motion.y: " << event.motion.y << "\n";
                         }
 
-                        previousMouseX = event.button.x;
-                        previousMouseY = event.button.y;
+                        previousMouseX = event.motion.x;
+                        previousMouseY = event.motion.y;
                     }
                     redraw = true;
                     break;
