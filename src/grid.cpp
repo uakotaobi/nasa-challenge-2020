@@ -179,7 +179,7 @@ std::tuple<double, double, double> Grid::gridLocation(Point p) const {
     // This will give us a matrix that will transform p into a new point, p'.
     // p' will be used for the parameters of interpolation.
     Point pPrime = cameraTransform(system_.axisX, system_.axisY, system_.axisZ, system_.center) * p;
-    std::cout << "pPrime: " << pPrime << "\n";
+    // std::cout << "pPrime: " << pPrime << "\n";
 
     double v = pPrime.x / (cellSize_ * (columns_ + 1));
     double u = pPrime.z / (cellSize_ * (rows_ + 1));
@@ -202,11 +202,11 @@ Point Grid::findFloor(double u, double v) const {
         v = 1;
     }
 
-    double row = u * (rows_ + 1);
-    double column = v * (columns_ + 1);
+    double row = u * (rows_);
+    double column = v * (columns_);
 
-    auto index = [this] (int x, int y) {
-        return (this->columns_ + 1) * y + x;
+    auto index = [this] (int column, int row) {
+        return (this->columns_ + 1) * row + column;
     };
 
     // Calculate the four corners of the current "patch".

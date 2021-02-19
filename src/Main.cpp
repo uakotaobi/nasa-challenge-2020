@@ -267,7 +267,7 @@ int main() {
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
-        getFloor(camera.center, mainView.getGrid());
+        // camera.center.y = getFloor(camera.center, mainView.getGrid()).y;
         // camera.apply(/*rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt) */
         // rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
 
