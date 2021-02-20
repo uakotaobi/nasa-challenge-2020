@@ -233,9 +233,9 @@ Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p) {
     Y = normalize(Y);
     Z = normalize(Z);
     // Transforms a basis so its axes are mapped to i, j, k.
-    Matrix rigidBodyTransformation(X.x, Y.x, Z.x, 0,
-                                   X.y, Y.y, Z.y, 0,
-                                   X.z, Y.z, Z.z, 0,
+    Matrix rigidBodyTransformation(X.x, X.y, X.z, 0,
+                                   Y.x, Y.y, Y.z, 0,
+                                   Z.x, Z.y, Z.z, 0,
                                    0, 0, 0, 1);
     return rigidBodyTransformation * p_to_origin;
 }

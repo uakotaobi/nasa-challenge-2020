@@ -213,12 +213,12 @@ int main() {
                             }
                             redraw = true;
                         }
-                    } else if (event.key.keysym.sym == SDLK_d) {
+                    } else if (event.key.keysym.sym == SDLK_a) {
                         if (currentView == 1) {
                             currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
                             redraw = true;
                         }
-                    } else if (event.key.keysym.sym == SDLK_a) {
+                    } else if (event.key.keysym.sym == SDLK_d) {
                         if (currentView == 1) {
                             currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
                             redraw = true;
@@ -283,12 +283,15 @@ int main() {
         }
 
         camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
-        camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
+        // camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
         camera.axisX = normalize(camera.axisX);
         camera.axisY = normalize(camera.axisY);
         camera.axisZ = normalize(camera.axisZ);
         camera = unRollCamera(mainView.getGrid().system().axisY, camera);
 
+        if (redraw) {
+            std::cout << "angle: " << acos(dotProduct(camera.axisZ, mainView.getGrid().system().axisZ)) * rad_to_deg << "\n";
+        }
         mainView.setCamera(camera);
 
         velocity *= frictionDecay;
