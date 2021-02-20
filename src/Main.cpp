@@ -65,7 +65,6 @@ Point getFloor(Point cameraCenter, const Grid& moonGrid) {
     double u = std::get<0>(uvh);
     double v = std::get<1>(uvh);
     Point p = moonGrid.findFloor(u, v);
-    std::cout << "Floor Point: " << p << "\t\t\tCamera Center: " << cameraCenter << "\t u: " << u << "\t v: " << v << "\n";
     return p;
 }
 
@@ -123,6 +122,8 @@ int main() {
 
     const int width = 1200;
     const int height = 700;
+    const double framesPerSecond = 20;
+    const double timeFactor = framesPerSecond/30; // This is a unitless constant that makes it so that 60 fps (or any other amount) has the same physics as 30 fps
     SDL_Window *window;
     SDL_Renderer *renderer;
 
@@ -152,14 +153,15 @@ int main() {
     MainView mainView(surf);
 
     // Kinematic variables
-    const double accelerationRate = 2;        // units/frame
-    const double angularAccelerationRate = 1; // degrees/frame
-    double currentTurningRate = 0;            // degrees/frame
-    const double maxTurningRate = 1;          // degrees/frame
-    Vector velocity(0, 0, 0);                 // current velocity
-    const double maxVelocity = 50;            // units/frame
-    const double frictionDecay = 0.85;        // %velocity per frame;
-    const double turningFrictionDecay = 0.75; // %velocity per frame;
+    const double accelerationRate = 2;                           // units/frame
+    const double angularAccelerationRate = 1 / timeFactor;       // degrees/frame
+    double currentTurningRate = 0;                               // degrees/frame
+    const double maxTurningRate = 1 * timeFactor;                // degrees/frame
+    Vector velocity(0, 0, 0);                                    // current velocity
+    const double maxVelocity = 50 * timeFactor;                  // units/frame
+    const double frictionDecay = 0.85;                           // %velocity per frame
+    const double turningFrictionDecay = 0.75;                    // %velocity per frame
+    const double gravitationalAcceleration = 9.8;                // units per second squared
 
     // sombrero. Ole!
     mainView.getGrid().setHeightByFunction([&mainView] (double x_, double y_) {
@@ -240,7 +242,6 @@ int main() {
                         menuView.handleResize(surf);
                     }  else if (event.window.event == SDL_WINDOWEVENT_EXPOSED) {
                         // The window was exposed and should be repainted.
-                        // std::cout << event.window.event << ": must redraw\n";
                         redraw = true;
                     }
                     break;
@@ -267,9 +268,8 @@ int main() {
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
-        // camera.center.y = getFloor(camera.center, mainView.getGrid()).y;
-        // camera.apply(/*rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt) */
-        // rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
+        const double heightFromFloor = 10;
+        camera.center.y = getFloor(camera.center, mainView.getGrid()).y + heightFromFloor;
 
 
         // DANGER WILL ROBINSON: GIMBAL LOCK
@@ -289,9 +289,7 @@ int main() {
         camera.axisZ = normalize(camera.axisZ);
         camera = unRollCamera(mainView.getGrid().system().axisY, camera);
 
-        if (redraw) {
-            std::cout << "angle: " << acos(dotProduct(camera.axisZ, mainView.getGrid().system().axisZ)) * rad_to_deg << "\n";
-        }
+
         mainView.setCamera(camera);
 
         velocity *= frictionDecay;
@@ -325,7 +323,7 @@ int main() {
                 break;
             } */
         }
-        SDL_Delay(1000/30);
+        SDL_Delay(1000/framesPerSecond);
     }
 
     SDL_DestroyRenderer(renderer);
