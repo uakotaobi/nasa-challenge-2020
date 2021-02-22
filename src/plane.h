@@ -30,6 +30,9 @@ struct Plane {
 
     // Returns a point that will be on the plane
     Point pointOnPlane() const;
+    
+    // Returns a reflection of an incoming vector.
+    Vector reflection(Vector incomingVector) const;
 
     // Returns the point of intersection between the given line and this plane.
     // Returns nullopt if line is parallel to the plane.

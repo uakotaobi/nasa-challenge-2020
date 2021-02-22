@@ -29,6 +29,12 @@ Point Plane::pointOnPlane() const {
     }
 }
 
+Vector Plane::reflection(Vector incomingVector) const {
+    Vector n = normalize(Vector(A, B, C));
+    // Here is a link to the reflection function: https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector.
+    return incomingVector - 2 * dotProduct(incomingVector, n) * n;
+}
+
 // function was implemented with the following source:
 // https://www.geomalgorithms.com/a05-_intersect-1.html#Line-Plane-Intersection
 std::optional<Point> Plane::pointOfIntersection(Point p1, Point p2) const {

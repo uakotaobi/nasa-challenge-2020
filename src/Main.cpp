@@ -18,9 +18,12 @@
 
 using namespace std;
 
+Point getFloor(Point cameraCenter, const Grid& moonGrid);
+
 // Checking if the camera has left the grid.
 // Returns the velocity vector that will be used for movement.
-Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
+Vector detectCollision(Basis camera, Vector velocity, const Grid& grid, 
+                       double heightFromFloor, double gravitationalAcceleration) {
     auto planes = {
         grid.leftPlane(),
         grid.rightPlane(),
@@ -36,6 +39,24 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid) {
             return Vector(0, 0, 0);
         }
     }
+    
+    Point groundPoint = getFloor(camera.center, grid);
+    // The groundPlane is ALWAYS parallel to the grid.gridPlane().
+    Plane groundPlane(groundPoint, grid.system().axisY); 
+    Point footPoint = camera.center - normalize(grid.system().axisY) * heightFromFloor;
+    
+    // Did our foot fall through the floor? 
+    if (groundPlane.whichSide(footPoint) < 0) {
+        // Yes it did- BOUNCE.
+        const double bounceDecay = 0.75;
+        velocity = bounceDecay * groundPlane.reflection(velocity);
+        // Make sure we end up above the groundPlane.
+        velocity += groundPoint - footPoint;
+    } else {
+        // Fall.
+        velocity += -normalize(grid.system().axisY) * gravitationalAcceleration;
+    }
+   
     return velocity;
 }
 // Reorients the camera so its vertical direction is equal to the absolute Y-axis
@@ -162,6 +183,7 @@ int main() {
     const double frictionDecay = 0.85;                           // %velocity per frame
     const double turningFrictionDecay = 0.75;                    // %velocity per frame
     const double gravitationalAcceleration = 9.8;                // units per second squared
+    const double heightFromFloor = 10;                           // height of the avatar in units
 
     // sombrero. Ole!
     mainView.getGrid().setHeightByFunction([&mainView] (double x_, double y_) {
@@ -265,11 +287,10 @@ int main() {
 
         // Handle camera movement
         Basis camera = mainView.getCamera();
-        Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid());
+        Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
-        const double heightFromFloor = 10;
-        camera.center.y = getFloor(camera.center, mainView.getGrid()).y + heightFromFloor;
+        // camera.center.y = getFloor(camera.center, mainView.getGrid()).y + heightFromFloor;
 
 
         // DANGER WILL ROBINSON: GIMBAL LOCK

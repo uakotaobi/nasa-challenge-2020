@@ -32,13 +32,16 @@ Vector& Vector::operator+=(Vector v) {
     return *this;
 }
 
-
 Vector operator-(Vector v) {
     return Vector(-v.x, -v.y, -v.z);
 }
 
 Point operator-(Point p, Vector v) {
     return Point(p.x-v.x, p.y-v.y, p.z-v.z);
+}
+
+Vector operator-(Vector v1, Vector v2) {
+    return Vector(v1.x-v2.x, v1.y-v2.y, v1.z-v2.z);
 }
 
 Vector& Vector::operator-=(Vector v) {
