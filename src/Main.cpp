@@ -22,7 +22,7 @@ Point getFloor(Point cameraCenter, const Grid& moonGrid);
 
 // Checking if the camera has left the grid.
 // Returns the velocity vector that will be used for movement.
-Vector detectCollision(Basis camera, Vector velocity, const Grid& grid, 
+Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
                        double heightFromFloor, double gravitationalAcceleration) {
     auto planes = {
         grid.leftPlane(),
@@ -39,26 +39,44 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
             return Vector(0, 0, 0);
         }
     }
-    
-    Point groundPoint = getFloor(camera.center, grid);
-    // The groundPlane is ALWAYS parallel to the grid.gridPlane().
-    Plane groundPlane(groundPoint, grid.system().axisY); 
-    Point footPoint = camera.center - normalize(grid.system().axisY) * heightFromFloor;
-    
-    // Did our foot fall through the floor? 
-    if (groundPlane.whichSide(footPoint) < 0) {
-        // Yes it did- BOUNCE.
-        const double bounceDecay = 0.75;
-        velocity = bounceDecay * groundPlane.reflection(velocity);
-        // Make sure we end up above the groundPlane.
-        velocity += groundPoint - footPoint;
-    } else {
-        // Fall.
-        velocity += -normalize(grid.system().axisY) * gravitationalAcceleration;
-    }
-   
+
+
+
     return velocity;
 }
+
+// Returns a vector that is ALWAYS parallel to the grid's axisY.
+// If this vector is in the same direction as the grid's axisY then you are bouncing upward
+// If this vector is in the opposite direction from the grid's axisY then you are falling downwards
+// Otherwise, you are standing still (returns 0 vector)
+Vector fallingVector(Basis camera, Vector verticalMotion, const Grid& grid,
+                     double heightFromFloor, double gravitationalAcceleration) {
+
+     Vector finalResult;
+     Point groundPoint = getFloor(camera.center, grid);
+     // The groundPlane is ALWAYS parallel to the grid.gridPlane().
+     Plane groundPlane(groundPoint, grid.system().axisY);
+     Point footPoint = camera.center - normalize(grid.system().axisY) * heightFromFloor;
+
+     // Did our foot fall through the floor?
+     if (groundPlane.whichSide(footPoint) < -epsilon) {
+         // Yes it did- BOUNCE.
+         const double bounceDecay = 0.75;
+         finalResult = bounceDecay * groundPlane.reflection(verticalMotion);
+         // Make sure we end up above the groundPlane.
+         finalResult += groundPoint - footPoint;
+         cout << "Units below groundPlane: " << distance(footPoint, groundPoint) << "\n";
+     } else if (groundPlane.whichSide(footPoint) > epsilon) {
+         // Fall.
+         finalResult = -normalize(grid.system().axisY) * gravitationalAcceleration;
+         Point p = footPoint + finalResult;
+         if (groundPlane.whichSide(p) < 0) {
+             finalResult = (groundPoint - footPoint);
+         }
+     }
+     return finalResult;
+}
+
 // Reorients the camera so its vertical direction is equal to the absolute Y-axis
 Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
     double thetaCamera;
@@ -179,6 +197,7 @@ int main() {
     double currentTurningRate = 0;                               // degrees/frame
     const double maxTurningRate = 1 * timeFactor;                // degrees/frame
     Vector velocity(0, 0, 0);                                    // current velocity
+    Vector verticalMotion(0, 0, 0);                              // gravity/bounce vector
     const double maxVelocity = 50 * timeFactor;                  // units/frame
     const double frictionDecay = 0.85;                           // %velocity per frame
     const double turningFrictionDecay = 0.75;                    // %velocity per frame
@@ -290,8 +309,10 @@ int main() {
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
-        // camera.center.y = getFloor(camera.center, mainView.getGrid()).y + heightFromFloor;
 
+        // Vertical motion is handled seperatly from lateral motion
+        verticalMotion = fallingVector(camera, verticalMotion, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
+        camera.apply(translationMatrix(verticalMotion));
 
         // DANGER WILL ROBINSON: GIMBAL LOCK
         // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
