@@ -227,13 +227,19 @@ Point Grid::findFloor(double u, double v) const {
     const double u_lr = ceil(u / rows_) * rows_;
     const double v_lr = ceil(u / columns_) * columns_;
 
-    // Calculate horizontal parameter of interpolation.
-    const double s = (v - v_ul) / (v_ur - v_ul);
+    // Calculate upper horizontal parameter of interpolation.
+    const double s_top = (v - v_ul) / (v_ur - v_ul);
+
+    // Calculate lower horizontal parameter of interpolation.
+    const double s_bottom = (v - v_ll) / (v_lr - v_ll);
 
     // Calculate vertical parameter of interpolation.
     const double r = (u - u_ul) / (u_ll - u_ul);
 
-    Point resultPoint = ul + (ur - ul) * s + (ll - ul) * r;
+    Point upper = ul + s_top * (ur - ul);
+    Point lower = ll + s_bottom * (lr - ll);
+
+    Point resultPoint = upper + r * (lower - upper);
 
     return resultPoint;
 

@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <map>
 
 #include "SDL.h"
 #include "button_view.h"
@@ -49,32 +50,58 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
 // If this vector is in the same direction as the grid's axisY then you are bouncing upward
 // If this vector is in the opposite direction from the grid's axisY then you are falling downwards
 // Otherwise, you are standing still (returns 0 vector)
-Vector fallingVector(Basis camera, Vector verticalMotion, const Grid& grid,
+Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
                      double heightFromFloor, double gravitationalAcceleration) {
 
      Vector finalResult;
+     const Vector up = normalize(grid.system().axisY);
+     const Vector down = -up;
+     const double falling_epsilon = 0.01;
+     const double bounceDecay = 0.75;
      Point groundPoint = getFloor(camera.center, grid);
-     // The groundPlane is ALWAYS parallel to the grid.gridPlane().
-     Plane groundPlane(groundPoint, grid.system().axisY);
-     Point footPoint = camera.center - normalize(grid.system().axisY) * heightFromFloor;
 
-     // Did our foot fall through the floor?
-     if (groundPlane.whichSide(footPoint) < -epsilon) {
-         // Yes it did- BOUNCE.
-         const double bounceDecay = 0.75;
-         finalResult = bounceDecay * groundPlane.reflection(verticalMotion);
-         // Make sure we end up above the groundPlane.
-         finalResult += groundPoint - footPoint;
-         cout << "Units below groundPlane: " << distance(footPoint, groundPoint) << "\n";
-     } else if (groundPlane.whichSide(footPoint) > epsilon) {
-         // Fall.
-         finalResult = -normalize(grid.system().axisY) * gravitationalAcceleration;
-         Point p = footPoint + finalResult;
-         if (groundPlane.whichSide(p) < 0) {
-             finalResult = (groundPoint - footPoint);
+     // The groundPlane is ALWAYS parallel to the grid.gridPlane().
+     Plane groundPlane(groundPoint, up);
+
+     Point footPoint = camera.center + down * heightFromFloor;
+
+     // Are we too close to ground?
+     if (abs(groundPlane.whichSide(footPoint)) < falling_epsilon) {
+         return Vector{0, 0, 0};
+     } else if (groundPlane.whichSide(footPoint) < 0) {
+         // Our feet went through the pavement.
+         finalResult = groundPoint - footPoint;
+     } else {
+         // We are too far above the ground, so we need to fall.
+         Vector putativeFallingVector = verticalMotion + down * gravitationalAcceleration;
+         Point predictedFootPoint = footPoint + putativeFallingVector;
+         if (groundPlane.whichSide(predictedFootPoint) < 0) {
+             // Our predicted location after we fall will be through the floor,
+             // so we need to stop at the floor, and bounce
+             camera.center = groundPoint + up * heightFromFloor;
+             finalResult = verticalMotion.magnitude() * up * bounceDecay;
+         } else {
+             finalResult = putativeFallingVector;
          }
      }
      return finalResult;
+
+     // // Did our foot fall through the floor?
+     // if (groundPlane.whichSide(footPoint) < -epsilon) {
+     //     // Yes it did- BOUNCE.
+     //     finalResult = bounceDecay * groundPlane.reflection(verticalMotion);
+     //     // Make sure we end up above the groundPlane.
+     //     finalResult += groundPoint - footPoint;
+     //     cout << "Units below groundPlane: " << distance(footPoint, groundPoint) << "\n";
+     // } else if (groundPlane.whichSide(footPoint) > epsilon) {
+     //     // Fall.
+     //     finalResult = -normalize(grid.system().axisY) * gravitationalAcceleration;
+     //     Point p = footPoint + finalResult;
+     //     if (groundPlane.whichSide(p) < 0) {
+     //         finalResult = (groundPoint - footPoint);
+     //     }
+     // }
+     // return finalResult;
 }
 
 // Reorients the camera so its vertical direction is equal to the absolute Y-axis
@@ -186,6 +213,8 @@ int main() {
     double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
     const double pixelsToDegrees = .75;   // Mouse's pixel movement to rotation degrees ratio
 
+    map<int, bool> pressedKeys;
+
     // Create views that user will see
     int currentView = 0;
     MenuView menuView(surf, currentView);
@@ -231,42 +260,10 @@ int main() {
                     currentView = -1;
                     break;
                 case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE) {
-                        if (currentView == 1) {
-                            // Break out of main view.
-                            currentView = 0;
-                            redraw = true;
-                        } else if (currentView == 0) {
-                            // Break out of menu view (exit the program.)
-                            currentView = -1;
-                        }
-                    } else if (event.key.keysym.sym == SDLK_w) {
-                        if (currentView == 1) {
-                            velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
-                            if (velocity.magnitude() > maxVelocity) {
-                                velocity = normalize(velocity) * maxVelocity;
-                            }
-                            redraw = true;
-                        }
-                    } else if (event.key.keysym.sym == SDLK_s) {
-                        if (currentView == 1) {
-                            velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
-                            if (velocity.magnitude() > maxVelocity) {
-                                velocity = normalize(velocity) * -maxVelocity;
-                            }
-                            redraw = true;
-                        }
-                    } else if (event.key.keysym.sym == SDLK_a) {
-                        if (currentView == 1) {
-                            currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
-                            redraw = true;
-                        }
-                    } else if (event.key.keysym.sym == SDLK_d) {
-                        if (currentView == 1) {
-                            currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
-                            redraw = true;
-                        }
-                    }
+                    pressedKeys[event.key.keysym.sym] = true;
+                    break;
+                case SDL_KEYUP:
+                    pressedKeys[event.key.keysym.sym] = false;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.clicks == 1 && currentView == 0) {
@@ -302,6 +299,53 @@ int main() {
                     redraw = true;
                     break;
             }
+
+            if (pressedKeys[SDLK_ESCAPE]) {
+                if (currentView == 1) {
+                    // Break out of main view.
+                    currentView = 0;
+                    redraw = true;
+                } else if (currentView == 0) {
+                    // Break out of menu view (exit the program.)
+                    currentView = -1;
+                }
+            }
+
+            if (pressedKeys[SDLK_w]) {
+                if (currentView == 1) {
+                    velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
+                    if (velocity.magnitude() > maxVelocity) {
+                        velocity = normalize(velocity) * maxVelocity;
+                    }
+                    redraw = true;
+                }
+            }
+
+            if (pressedKeys[SDLK_s]) {
+                if (currentView == 1) {
+                    velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
+                    if (velocity.magnitude() > maxVelocity) {
+                        velocity = normalize(velocity) * -maxVelocity;
+                    }
+                    redraw = true;
+                }
+            }
+
+            if (pressedKeys[SDLK_a]) {
+                if (currentView == 1) {
+                    currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+                    redraw = true;
+                }
+            }
+
+            if (pressedKeys[SDLK_d]) {
+                if (currentView == 1) {
+                    currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+                    redraw = true;
+                }
+            }
+
+
         } // End of event processing.
 
         // Handle camera movement
