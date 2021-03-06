@@ -188,7 +188,7 @@ int main() {
 
     const int width = 1200;
     const int height = 700;
-    const double framesPerSecond = 20;
+    const double framesPerSecond = 30;
     const double timeFactor = framesPerSecond/30; // This is a unitless constant that makes it so that 60 fps (or any other amount) has the same physics as 30 fps
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -221,17 +221,20 @@ int main() {
     MainView mainView(surf);
 
     // Kinematic variables
-    const double accelerationRate = 2;                           // units/frame
-    const double angularAccelerationRate = 1 / timeFactor;       // degrees/frame
-    double currentTurningRate = 0;                               // degrees/frame
-    const double maxTurningRate = 1 * timeFactor;                // degrees/frame
-    Vector velocity(0, 0, 0);                                    // current velocity
-    Vector verticalMotion(0, 0, 0);                              // gravity/bounce vector
-    const double maxVelocity = 50 * timeFactor;                  // units/frame
-    const double frictionDecay = 0.85;                           // %velocity per frame
-    const double turningFrictionDecay = 0.75;                    // %velocity per frame
-    const double gravitationalAcceleration = 9.8;                // units per second squared
-    const double heightFromFloor = 10;                           // height of the avatar in units
+    const double accelerationRate = 2;                              // units/frame
+    const double angularAccelerationRate = 1 / timeFactor;          // degrees/frame
+    double currentTurningRate = 0;                                  // degrees/frame
+    const double maxTurningRate = 1 * timeFactor;                   // degrees/frame
+    Vector velocity(0, 0, 0);                                       // current velocity
+    Vector verticalMotion(0, 0, 0);                                 // gravity/bounce vector
+    const double maxVelocity = 50 * timeFactor;                     // units/frame
+    const double frictionDecay = 0.85;                              // %velocity per frame
+    const double turningFrictionDecay = 0.75;                       // %velocity per frame
+    const double earthGravityFudgeFactor = 1.0;                     // unitless
+    const double gravitationalAcceleration = 9.8 / framesPerSecond * earthGravityFudgeFactor; // units per second^2
+    const double heightFromFloor = 2.25;                              // height of the avatar in meters
+
+    // 9.8 m/s^2 = x m/f * 30f/s
 
     // sombrero. Ole!
     mainView.getGrid().setHeightByFunction([&mainView] (double x_, double y_) {
@@ -341,6 +344,27 @@ int main() {
             if (pressedKeys[SDLK_d]) {
                 if (currentView == 1) {
                     currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+                    redraw = true;
+                }
+            }
+
+            if (pressedKeys[SDLK_SPACE]) {
+                if (currentView == 1) {
+                    const double boosterPower = 1.50;
+                    const double maxVerticalSpeed = 5 / framesPerSecond; // units per Second
+                    const Vector up = normalize(mainView.getGrid().system().axisY);
+                    bool boostingAllowed = true;
+
+                    if (verticalMotion.magnitude() > maxVerticalSpeed) {
+                        double cosTheta = dotProduct(normalize(verticalMotion), up);
+                        if (cosTheta >= 0 && cosTheta < 1) {
+                            // Going too fast, booster is not gonna turn on.
+                            boostingAllowed = false;
+                        }
+                    }
+                    if (boostingAllowed) {
+                        verticalMotion += up * gravitationalAcceleration * boosterPower;
+                    }
                     redraw = true;
                 }
             }
