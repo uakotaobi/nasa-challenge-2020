@@ -31,14 +31,25 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
         grid.forwardPlane(),
         grid.backPlane()
     };
+    Point correctedLocation = camera.center;
 
     Point futureLocation = camera.center + velocity;
 
     for (Plane p : planes) {
-        if (p.whichSide(futureLocation) > 0) {
-            // Outside of boundaries
-            return Vector(0, 0, 0);
+        double distanceFromPlane = p.distance(correctedLocation);
+        if (distanceFromPlane > 0) {
+            // Force correctedLocation to be inbounds for this plane.
+            correctedLocation -= normalize(p.normalVector()) * distanceFromPlane;
+            continue;
         }
+        // if (p.whichSide(futureLocation) > 0) {
+        //     // Outside of boundaries
+        //     return Vector(0, 0, 0);
+        // }
+    }
+    if ((correctedLocation - camera.center).magnitude() > epsilon) {
+        // We had to adjust our position because we were out of bounds.
+        return correctedLocation - camera.center;
     }
 
 
