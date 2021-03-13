@@ -32,8 +32,9 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
         grid.backPlane()
     };
     Point correctedLocation = camera.center;
+    Vector correctedVector = velocity;
 
-    Point futureLocation = camera.center + velocity;
+
 
     for (Plane p : planes) {
         double distanceFromPlane = p.distance(correctedLocation);
@@ -42,10 +43,20 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
             correctedLocation -= normalize(p.normalVector()) * distanceFromPlane;
             continue;
         }
-        // if (p.whichSide(futureLocation) > 0) {
-        //     // Outside of boundaries
-        //     return Vector(0, 0, 0);
-        // }
+        Point futureLocation = camera.center + correctedVector;
+        if (p.whichSide(futureLocation) > 0) {
+            // Our future location is out of bounds
+            if (abs(p.whichSide(camera.center)) < epsilon) {
+                // We are already on the wall - Slide
+                correctedVector = p.projection(correctedVector);
+            } else {
+                // Far from wall, but about to move past it, so we need to move to the wall, then slide;
+                auto intersection = p.pointOfIntersection(camera.center, futureLocation);
+                if (intersection) {
+                    correctedVector = *intersection - camera.center;
+                }
+            }
+        }
     }
     if ((correctedLocation - camera.center).magnitude() > epsilon) {
         // We had to adjust our position because we were out of bounds.
@@ -53,7 +64,7 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
     }
 
 
-
+    velocity = correctedVector;
     return velocity;
 }
 

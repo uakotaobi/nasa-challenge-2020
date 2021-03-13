@@ -15,7 +15,7 @@ double Plane::whichSide(Point p) const {
 Vector Plane::projection(Vector v) const{
     Vector n = normalize(normalVector());
     Vector p = n * dotProduct(v, n);
-    return p - v;
+    return v - p;
 }
 double Plane::distance(Point p) const{
     return whichSide(p) / normalVector().magnitude();
@@ -63,5 +63,3 @@ std::optional<Point> Plane::pointOfIntersection(Point p1, Point p2) const {
         }
     }
 }
-
-

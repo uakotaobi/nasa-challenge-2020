@@ -16,9 +16,10 @@ struct Point {
     friend double distance(Point a, Point b);
 
     friend Vector operator-(Point p1, Point p2);
+    Point& operator-=(Vector v);
 
     friend std::ostream& operator<<(std::ostream&, Point p);
-    
+
 };
 
 #endif // POINT_H_INCLUDED

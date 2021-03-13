@@ -13,6 +13,13 @@ Vector operator-(Point p1, Point p2) {
     return Vector(p1.x-p2.x, p1.y-p2.y, p1.z-p2.z);
 }
 
+Point& Point::operator-=(Vector v) {
+    x -= v.x;
+    y -= v.y;
+    z -= v.z;
+    return *this;
+}
+
 std::ostream& operator<<(std::ostream& s, Point p) {
     s << "(" << p.x << ", " << p.y << ", " << p.z << ")";
     return s;
