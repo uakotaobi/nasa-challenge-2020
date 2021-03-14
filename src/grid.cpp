@@ -103,22 +103,12 @@ Plane Grid::backPlane() const {
 }
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
+    // Transform any object in world space to camera space.
+    // "camera space" is world space but with the camera at the origin.
     const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
     const double focalDistance = 60;
     // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
     // Growing this rectangle zooms the camera out.
-
-    // Commented out because the goal to shrink our camera's fov didnt look great.
-    // This also caused lots of lag (will fix later)
-    // And revealed a problem with wall clipping at high speeds, causing us to leave the grid, and fall through the gridPlane.
-
-    //      const double sizeFactor = 0.333;  // Used to change the field of view to "grow or shrink" the character. < 1 is shrinking, > 1 is growing
-    //      const SDL_Rect screenRect = {
-    //          int(-63 * sizeFactor),
-    //          int(-63 * sizeFactor),
-    //          int(125 * sizeFactor),
-    //          int(125 * sizeFactor)
-    //      };
     const SDL_Rect screenRect = {
         -63,
         -63,

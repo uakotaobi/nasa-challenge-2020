@@ -38,7 +38,7 @@ Matrix operator*(Matrix m1, Matrix m2) {
         int m1_row = int(k/4);
         int m2_column = k%4;
 
-        // "i" is the current position in the row and colunm we are multiplying
+        // "i" is the current position in the row and column we are multiplying
         for (int i = 0; i < 4; i += 1) {
             int m1_data_index = m1_row * 4 + i;
             int m2_data_index = m2_column + 4 * i;
