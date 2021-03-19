@@ -6,6 +6,13 @@ Plane::Plane() : A (0), B (0), C (1), D (0) {};
 Plane::Plane(double A_, double B_, double C_, double D_) : A (A_), B (B_), C (C_), D (D_) {};
 Plane::Plane(Point center, Vector normal) : A (normal.x), B (normal.y), C (normal.z), D (-(normal.x * center.x  + normal.y * center.y + normal.z * center.z)) {};
 
+Plane::Plane(Point a, Point b, Point c) {
+    A = (b.y - a.y) * (c.z - a.z) - (c.y - a.y) * (b.z - a.z);
+    B = (b.z - a.z) * (c.x - a.x) - (c.z - a.z) * (b.x - a.x);
+    C = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+    D = -(A * a.x + B * a.y + C * a.z);
+}
+
 Vector Plane::normalVector() const {
     return Vector(A, B, C);
 }

@@ -19,6 +19,7 @@ struct Plane {
     Plane();
     Plane(double A_, double B_, double C_, double D_);
     Plane(Point center, Vector normal);
+    Plane(Point a, Point b, Point c);
 
     // Normal is always perpendicular to the plane
     Vector normalVector() const;
@@ -30,7 +31,7 @@ struct Plane {
 
     // Returns a point that will be on the plane
     Point pointOnPlane() const;
-    
+
     // Returns a reflection of an incoming vector.
     Vector reflection(Vector incomingVector) const;
 
@@ -38,10 +39,10 @@ struct Plane {
     // Returns nullopt if line is parallel to the plane.
     std::optional<Point> pointOfIntersection(Point p1, Point p2) const;
 
-    // Returns the projection of onto this plane, in other words it returns the component of v which is parallel to this plane.  
+    // Returns the projection of onto this plane, in other words it returns the component of v which is parallel to this plane.
     Vector projection(Vector v) const;
-    
-    // Returns the smallest distance between "p" and the Plane. 
+
+    // Returns the smallest distance between "p" and the Plane.
     double distance(Point p) const;
 
 };
