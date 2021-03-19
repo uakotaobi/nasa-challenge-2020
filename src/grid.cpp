@@ -2,6 +2,7 @@
 #include "plane.h"
 #include <iostream>
 #include "matrix.h"
+#include "render.h"
 
 GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{255, 255, 255, 255}), temperatureKelvin(0), slopeDeg(0), height(0) {}
 GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, double slopeDeg_, double height_)
@@ -103,6 +104,10 @@ Plane Grid::backPlane() const {
 }
 
 void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
+    Renderer r;
+    r.prepare(canvas, viewPortRect, camera);
+    r.renderPoint(lattice.begin(), lattice.end());
+    return;
     // Transform any object in world space to camera space.
     // "camera space" is world space but with the camera at the origin.
     const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);

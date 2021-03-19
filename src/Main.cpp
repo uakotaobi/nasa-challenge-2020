@@ -79,7 +79,7 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
      const Vector up = normalize(grid.system().axisY);
      const Vector down = -up;
      const double falling_epsilon = 0.01;
-     const double bounceDecay = 0.75;
+     const double bounceDecay = 0.50;
      Point groundPoint = getFloor(camera.center, grid);
 
      // The groundPlane is ALWAYS parallel to the grid.gridPlane().

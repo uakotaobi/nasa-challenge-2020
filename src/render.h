@@ -1,6 +1,10 @@
 #ifndef RENDER_H_INCLUDED
 #define RENDER_H_INCLUDED
 
+#include "SDL.h"
+#include "basis.h"
+#include "matrix.h"
+
 class Renderer {
     public:
         Renderer();
@@ -32,11 +36,20 @@ class Renderer {
                 // Offset formula:
                 // width*y+x
                 unsigned int offset = canvas->w * static_cast<unsigned int>(p.y) + static_cast<unsigned int>(p.x);
-                pixels[offset] = SDL_MapRGBA(canvas->format, currentPoint.color.r, currentPoint.color.g, currentPoint.color.b, currentPoint.color.a);
+                pixels[offset] = SDL_MapRGBA(canvas->format, color.r, color.g, color.b, color.a);
             }
         }
     private:
         const double focalDistance = 60;
+        
+        SDL_Surface* canvas;
+        SDL_Rect viewPortRect; 
+        Basis camera;
+        
+        Matrix cameraMatrix;
+        SDL_Rect screenRect;
+        Matrix projectionMatrix;
+        uint32_t* pixels;
 };
 
 #endif // RENDER_H_INCLUDED
