@@ -103,72 +103,8 @@ Plane Grid::backPlane() const {
     return Plane(system_.center + -system_.axisZ * cellSize_/2 * rows_, -system_.axisZ);
 }
 
-void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
-    Renderer r;
-    r.prepare(canvas, viewPortRect, camera);
+void Grid::render(const Renderer& r) const {
     r.renderPoint(lattice.begin(), lattice.end());
-    return;
-    // Transform any object in world space to camera space.
-    // "camera space" is world space but with the camera at the origin.
-    const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
-    const double focalDistance = 60;
-    // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
-    // Growing this rectangle zooms the camera out.
-    const SDL_Rect screenRect = {
-        -63,
-        -63,
-        125,
-        125
-    };
-    const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
-
-    uint32_t* const pixels = static_cast<uint32_t*>(canvas->pixels);
-
-    for (const GridPoint& currentPoint: lattice) {
-        Point p = currentPoint;
-        // std::cout << p << '\n';
-
-        p = cameraMatrix * p;
-        if (p.z < 0) {
-            continue;
-        }
-        p = projectionMatrix * p;
-
-        // Any point out of bounds of the view rectangle is skipped.
-        if (p.x < viewPortRect.x ||
-            p.y < viewPortRect.y ||
-            p.x >= viewPortRect.x + viewPortRect.w ||
-            p.y >= viewPortRect.y + viewPortRect.h) {
-                continue;
-        }
-
-        // Render points that weren't skipped.
-        // Offset formula:
-        // width*y+x
-        unsigned int offset = canvas->w * static_cast<unsigned int>(p.y) + static_cast<unsigned int>(p.x);
-        pixels[offset] = SDL_MapRGBA(canvas->format, currentPoint.color.r, currentPoint.color.g, currentPoint.color.b, currentPoint.color.a);
-
-        /* // Temporary: make the pixels much bigger to see better.
-        const int pixelSize = 7;
-        SDL_Rect pixelRect = {static_cast<int>(p.x) - pixelSize/2,
-                              static_cast<int>(p.y) - pixelSize/2,
-                              pixelSize,
-                              pixelSize};
-        SDL_Rect intersection;
-        if (SDL_IntersectRect(&viewPortRect, &pixelRect, &intersection)) {
-            SDL_FillRect(canvas,
-                         &pixelRect,
-                         SDL_MapRGBA(canvas->format,
-                                     currentPoint.color.r,
-                                     currentPoint.color.g,
-                                     currentPoint.color.b,
-                                     currentPoint.color.a));
-           //std::cout << p << '\n';
-
-        } */
-
-    }
-
 }
 
 std::tuple<double, double, double> Grid::gridLocation(Point p) const {

@@ -47,7 +47,7 @@ class Grid {
 
 
         // Have 3D grid points displayed in 2D
-        void render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera);
+        void render(const Renderer& r) const;
 
 
         // Return the center plane of the grid (grid points can be located above or BELOW the plane).
