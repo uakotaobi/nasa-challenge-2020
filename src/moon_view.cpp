@@ -12,7 +12,8 @@ void MoonView::draw(SDL_Surface* screen) {
     // Viewport is filled with black.
     SDL_FillRect(screen, &boundaryMoonView, SDL_MapRGB(screen->format, 0, 0, 0));
 
-    moonGrid.render(screen, boundaryMoonView, camera);
+    // This function no longer exists.
+    // moonGrid.render(screen, boundaryMoonView, camera);
 }
 
 SDL_Rect MoonView::boundary() const {
@@ -28,5 +29,8 @@ Grid& MoonView::getGrid() {
 }
 
 void MoonView::drawWithRenderer(const Renderer& r) const {
-    
+    // Viewport is filled with black.
+    SDL_FillRect(r.getScreen(), &boundaryMoonView, SDL_MapRGB(r.getScreen()->format, 0, 0, 0));
+
+    moonGrid.render(r);
 }

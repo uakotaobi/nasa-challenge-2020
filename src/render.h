@@ -8,22 +8,25 @@
 class Renderer {
     public:
         Renderer();
-        
-        // This function is called at the beginning of the frame that you are rendering. 
+
+        // This function is called at the beginning of the frame that you are rendering.
         void prepare(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera);
-        
+
+        // This exposes our internal SDL_Surface so that other people can use it.
+        SDL_Surface* getScreen();
+
         template <typename ColorPointIterator>
         void renderPoint(ColorPointIterator begin, ColorPointIterator end) const {
             for (ColorPointIterator iter = begin; iter != end; ++iter) {
                 Point p = static_cast<Point&>(*iter);
                 SDL_Color color = iter->color;
-                
+
                 p = cameraMatrix * p;
                 if (p.z < 0) {
                     continue;
                 }
                 p = projectionMatrix * p;
-        
+
                 // Any point out of bounds of the view rectangle is skipped.
                 if (p.x < viewPortRect.x ||
                     p.y < viewPortRect.y ||
@@ -31,7 +34,7 @@ class Renderer {
                     p.y >= viewPortRect.y + viewPortRect.h) {
                         continue;
                 }
-        
+
                 // Render points that weren't skipped.
                 // Offset formula:
                 // width*y+x
@@ -41,11 +44,12 @@ class Renderer {
         }
     private:
         const double focalDistance = 60;
-        
+
+        // These variabes change from frame to frame.
         SDL_Surface* canvas;
-        SDL_Rect viewPortRect; 
+        SDL_Rect viewPortRect;
         Basis camera;
-        
+
         Matrix cameraMatrix;
         SDL_Rect screenRect;
         Matrix projectionMatrix;

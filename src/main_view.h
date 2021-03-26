@@ -10,6 +10,8 @@ class MainView : public View {
     public:
         MainView(SDL_Surface* screen);
         void draw(SDL_Surface* screen);
+        void drawWithRenderer(const Renderer& r) const;
+        SDL_Rect getRenderBoundary() const; // TODO: Return moonview.boundary
         SDL_Rect boundary() const;
         void handleResize(SDL_Surface* screen);
         void setCamera(const Basis& newCamera);

@@ -7,11 +7,11 @@ void Renderer::prepare(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera)
     this->canvas = canvas;
     this->viewPortRect = viewPortRect;
     this->camera = camera;
-    
+
     // Transform any object in world space to camera space.
     // "camera space" is world space but with the camera at the origin.
     cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
-    
+
     // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
     // Growing this rectangle zooms the camera out.
     screenRect = {
@@ -20,8 +20,12 @@ void Renderer::prepare(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera)
         125,
         125
     };
-    projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
-    
-    pixels = static_cast<uint32_t*>(canvas->pixels);
 
+    projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
+
+    pixels = static_cast<uint32_t*>(canvas->pixels);
+}
+
+SDL_Surface* Renderer::getScreen() {
+    return canvas;
 }

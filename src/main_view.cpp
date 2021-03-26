@@ -23,6 +23,14 @@ void MainView::draw(SDL_Surface* screen) {
 	navView.draw(screen);
 }
 
+void MainView::drawWithRenderer(const Renderer& r) const {
+    SDL_Surface* screen = r.getScreen();
+    SDL_FillRect(screen, &boundaryMainView, SDL_MapRGB(screen->format, 0, 0, 0));
+    moonView.drawWithRenderer(r);
+    infoView.draw(screen);
+	navView.draw(screen);
+}
+
 SDL_Rect MainView::boundary() const {
     return boundaryMainView;
 
