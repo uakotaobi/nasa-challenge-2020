@@ -16,6 +16,10 @@ MainView::MainView(SDL_Surface* screen)
     this->setCamera(camera);
 }
 
+SDL_Rect MainView::getRenderBoundary() const {
+    return moonView.boundary();
+}
+
 void MainView::draw(SDL_Surface* screen) {
     SDL_FillRect(screen, &boundaryMainView, SDL_MapRGB(screen->format, 0, 0, 0));
     moonView.draw(screen);
@@ -23,7 +27,7 @@ void MainView::draw(SDL_Surface* screen) {
 	navView.draw(screen);
 }
 
-void MainView::drawWithRenderer(const Renderer& r) const {
+void MainView::drawWithRenderer(const Renderer& r) {
     SDL_Surface* screen = r.getScreen();
     SDL_FillRect(screen, &boundaryMainView, SDL_MapRGB(screen->format, 0, 0, 0));
     moonView.drawWithRenderer(r);

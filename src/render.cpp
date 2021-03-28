@@ -26,6 +26,6 @@ void Renderer::prepare(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera)
     pixels = static_cast<uint32_t*>(canvas->pixels);
 }
 
-SDL_Surface* Renderer::getScreen() {
+SDL_Surface* Renderer::getScreen() const{
     return canvas;
 }

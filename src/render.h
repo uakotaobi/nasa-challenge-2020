@@ -13,12 +13,12 @@ class Renderer {
         void prepare(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera);
 
         // This exposes our internal SDL_Surface so that other people can use it.
-        SDL_Surface* getScreen();
+        SDL_Surface* getScreen() const;
 
         template <typename ColorPointIterator>
         void renderPoint(ColorPointIterator begin, ColorPointIterator end) const {
             for (ColorPointIterator iter = begin; iter != end; ++iter) {
-                Point p = static_cast<Point&>(*iter);
+                Point p = static_cast<Point>(*iter); // Making an explicit copy here
                 SDL_Color color = iter->color;
 
                 p = cameraMatrix * p;

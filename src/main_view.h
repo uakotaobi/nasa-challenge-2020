@@ -5,13 +5,14 @@
 #include "moon_view.h"
 #include "info_view.h"
 #include "nav_view.h"
+#include "render.h"
 
 class MainView : public View {
     public:
         MainView(SDL_Surface* screen);
         void draw(SDL_Surface* screen);
-        void drawWithRenderer(const Renderer& r) const;
-        SDL_Rect getRenderBoundary() const; // TODO: Return moonview.boundary
+        void drawWithRenderer(const Renderer& r);
+        SDL_Rect getRenderBoundary() const;
         SDL_Rect boundary() const;
         void handleResize(SDL_Surface* screen);
         void setCamera(const Basis& newCamera);

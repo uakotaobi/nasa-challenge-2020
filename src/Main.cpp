@@ -16,6 +16,7 @@
 #include "grid.h"
 #include "common.h"
 #include "vector.h"
+#include "render.h"
 
 using namespace std;
 
@@ -440,7 +441,9 @@ int main() {
             if (currentView == 0) {
                 menuView.draw(surf);
             } else if (currentView == 1) {
-                mainView.draw(surf);
+                Renderer r;
+                r.prepare(surf, mainView.getRenderBoundary(), camera);
+                mainView.drawWithRenderer(r);
 
             }
 

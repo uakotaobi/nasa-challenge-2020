@@ -10,6 +10,7 @@
 #include "vector.h"
 #include "basis.h"
 #include "plane.h"
+#include "render.h"
 
 struct GridPoint : public Point {
     // We don't need elevation variable, we have this->y

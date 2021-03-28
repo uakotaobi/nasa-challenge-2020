@@ -4,6 +4,7 @@
 #include "view.h"
 #include "grid.h"
 #include "basis.h"
+#include "render.h"
 
 class MoonView : public View {
     public:
