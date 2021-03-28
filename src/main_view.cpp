@@ -42,6 +42,13 @@ SDL_Rect MainView::boundary() const {
 
 void MainView::handleResize(SDL_Surface* screen) {
     boundaryMainView = SDL_Rect{0, 0, screen->w, screen->h};
+    SDL_Rect moonViewRect = SDL_Rect{(screen->w/10),(screen->h/20),(screen->w*2/3),(screen->h*4/5)};
+    SDL_Rect infoViewRect = SDL_Rect{(screen->w/10*8),(screen->h/20),(screen->w*1/6),(screen->h*4/5)};
+    SDL_Rect navViewRect = SDL_Rect{10,(screen->h/20),(screen->w*1/12),(screen->h*4/5)};
+    moonView.setBoundary(moonViewRect);
+    this->infoView = InfoView(infoViewRect, 0, 0);
+    this->navView = NavView(navViewRect, 0, 0);
+
 }
 
 void MainView::setCamera(const Basis& newCamera) {

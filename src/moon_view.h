@@ -16,6 +16,7 @@ class MoonView : public View {
 
         SDL_Rect boundary() const;
         // void handleResize(SDL_Surface* screen);
+        void setBoundary(SDL_Rect newBoundary);
         void setCamera(const Basis& newCamera);
         Grid& getGrid();
 

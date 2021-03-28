@@ -20,6 +20,10 @@ SDL_Rect MoonView::boundary() const {
     return boundaryMoonView;
 }
 
+void MoonView::setBoundary(SDL_Rect newBoundary) {
+    boundaryMoonView = newBoundary;
+}
+
 void MoonView::setCamera(const Basis& newCamera) {
     camera = newCamera;
 }

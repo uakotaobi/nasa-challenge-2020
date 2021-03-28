@@ -253,7 +253,7 @@ int main() {
     const double accelerationRate = 2;                              // units/frame
     const double angularAccelerationRate = 1 / timeFactor;          // degrees/frame
     double currentTurningRate = 0;                                  // degrees/frame
-    const double maxTurningRate = 1 * timeFactor;                   // degrees/frame
+    const double maxTurningRate = 3 * timeFactor;                   // degrees/frame
     Vector velocity(0, 0, 0);                                       // current velocity
     Vector verticalMotion(0, 0, 0);                                 // gravity/bounce vector
     const double maxVelocity = 50 * timeFactor;                     // units/frame
@@ -309,7 +309,11 @@ int main() {
                         int newWidth = event.window.data1;
                         int newHeight = event.window.data2;
                         surf = SDL_CreateRGBSurfaceWithFormat(0, newWidth, newHeight, 32, SDL_PIXELFORMAT_RGBA32);
-                        menuView.handleResize(surf);
+                        if (currentView == 0) {
+                            menuView.handleResize(surf);
+                        } else {
+                            mainView.handleResize(surf);
+                        }
                     }  else if (event.window.event == SDL_WINDOWEVENT_EXPOSED) {
                         // The window was exposed and should be repainted.
                         redraw = true;
@@ -331,76 +335,75 @@ int main() {
                     redraw = true;
                     break;
             }
-
-            if (pressedKeys[SDLK_ESCAPE]) {
-                if (currentView == 1) {
-                    // Break out of main view.
-                    currentView = 0;
-                    redraw = true;
-                } else if (currentView == 0) {
-                    // Break out of menu view (exit the program.)
-                    currentView = -1;
-                }
-            }
-
-            if (pressedKeys[SDLK_w]) {
-                if (currentView == 1) {
-                    velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
-                    if (velocity.magnitude() > maxVelocity) {
-                        velocity = normalize(velocity) * maxVelocity;
-                    }
-                    redraw = true;
-                }
-            }
-
-            if (pressedKeys[SDLK_s]) {
-                if (currentView == 1) {
-                    velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
-                    if (velocity.magnitude() > maxVelocity) {
-                        velocity = normalize(velocity) * -maxVelocity;
-                    }
-                    redraw = true;
-                }
-            }
-
-            if (pressedKeys[SDLK_a]) {
-                if (currentView == 1) {
-                    currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
-                    redraw = true;
-                }
-            }
-
-            if (pressedKeys[SDLK_d]) {
-                if (currentView == 1) {
-                    currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
-                    redraw = true;
-                }
-            }
-
-            if (pressedKeys[SDLK_SPACE]) {
-                if (currentView == 1) {
-                    const double boosterPower = 1.50;
-                    const double maxVerticalSpeed = 5 / framesPerSecond; // units per Second
-                    const Vector up = normalize(mainView.getGrid().system().axisY);
-                    bool boostingAllowed = true;
-
-                    if (verticalMotion.magnitude() > maxVerticalSpeed) {
-                        double cosTheta = dotProduct(normalize(verticalMotion), up);
-                        if (cosTheta >= 0 && cosTheta < 1) {
-                            // Going too fast, booster is not gonna turn on.
-                            boostingAllowed = false;
-                        }
-                    }
-                    if (boostingAllowed) {
-                        verticalMotion += up * gravitationalAcceleration * boosterPower;
-                    }
-                    redraw = true;
-                }
-            }
-
-
         } // End of event processing.
 
+        // Keys are stored here to deal with the problem where there is a pause after an initial keypress to the repeating key presses.
+        // For more info: https://gamedev.stackexchange.com/questions/63979/brief-pause-after-keypress
+        if (pressedKeys[SDLK_ESCAPE]) {
+            if (currentView == 1) {
+                // Break out of main view.
+                currentView = 0;
+                redraw = true;
+            } else if (currentView == 0) {
+                // Break out of menu view (exit the program.)
+                currentView = -1;
+            }
+        }
+
+        if (pressedKeys[SDLK_w]) {
+            if (currentView == 1) {
+                velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
+                if (velocity.magnitude() > maxVelocity) {
+                    velocity = normalize(velocity) * maxVelocity;
+                }
+                redraw = true;
+            }
+        }
+
+        if (pressedKeys[SDLK_s]) {
+            if (currentView == 1) {
+                velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
+                if (velocity.magnitude() > maxVelocity) {
+                    velocity = normalize(velocity) * -maxVelocity;
+                }
+                redraw = true;
+            }
+        }
+
+        if (pressedKeys[SDLK_a]) {
+            if (currentView == 1) {
+                currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+                redraw = true;
+            }
+        }
+
+        if (pressedKeys[SDLK_d]) {
+            if (currentView == 1) {
+                currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+                redraw = true;
+            }
+        }
+
+        if (pressedKeys[SDLK_SPACE]) {
+            if (currentView == 1) {
+                const double boosterPower = 1.50;
+                const double maxVerticalSpeed = 5 / framesPerSecond; // units per Second
+                const Vector up = normalize(mainView.getGrid().system().axisY);
+                bool boostingAllowed = true;
+
+                if (verticalMotion.magnitude() > maxVerticalSpeed) {
+                    double cosTheta = dotProduct(normalize(verticalMotion), up);
+                    if (cosTheta >= 0 && cosTheta < 1) {
+                        // Going too fast, booster is not gonna turn on.
+                        boostingAllowed = false;
+                    }
+                }
+                if (boostingAllowed) {
+                    verticalMotion += up * gravitationalAcceleration * boosterPower;
+                }
+                redraw = true;
+            }
+        }
         // Handle camera movement
         Basis camera = mainView.getCamera();
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
