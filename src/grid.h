@@ -3,12 +3,14 @@
 
 #include <vector>
 #include <functional>
+#include <tuple>
 
 #include "SDL.h"
 #include "point.h"
 #include "vector.h"
 #include "basis.h"
 #include "plane.h"
+#include "render.h"
 
 struct GridPoint : public Point {
     // We don't need elevation variable, we have this->y
@@ -46,7 +48,7 @@ class Grid {
 
 
         // Have 3D grid points displayed in 2D
-        void render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera);
+        void render(const Renderer& r) const;
 
 
         // Return the center plane of the grid (grid points can be located above or BELOW the plane).
@@ -71,6 +73,29 @@ class Grid {
                                  std::function<SDL_Color(double, double)> colorFunc = [] (double x, double y) {
                                      return SDL_Color{255, 255, 255, 255};
                                  });
+
+        // Gets the parameters of surface interpolation for the given point
+        //
+        // Returns a triplet of floating point numbers:
+        // - u, which is the parameter of interpolation for the row.
+        // - v, which is the parameter of interpolation for the columns.
+        // - h, which is the minimum distance of the point from the gridPlane().
+        //
+        // If the point is at the upper left, it is at (u = 0, v = 0) (elevation doesn't matter)
+        // Lower right = (1, 1)
+        // Upper right = (0, 1)
+        // Lower left = (1, 0)
+        //
+        // Can return valid data for points outside the grid.
+        std::tuple<double, double, double> gridLocation(Point p) const;
+
+        // Uses averages of the nearest grid points to u and v, and determines
+        // where the "floor" should be, even when u and v don't directly
+        // correspond to a grid point boundary.
+        //
+        // 0 <= v <= 1
+        // 0 <= u <= 1
+        Point findFloor(double u, double v) const;
     private:
         std::vector<GridPoint> lattice;
         Basis system_;

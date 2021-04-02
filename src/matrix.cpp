@@ -38,7 +38,7 @@ Matrix operator*(Matrix m1, Matrix m2) {
         int m1_row = int(k/4);
         int m2_column = k%4;
 
-        // "i" is the current position in the row and colunm we are multiplying
+        // "i" is the current position in the row and column we are multiplying
         for (int i = 0; i < 4; i += 1) {
             int m1_data_index = m1_row * 4 + i;
             int m2_data_index = m2_column + 4 * i;
@@ -233,9 +233,9 @@ Matrix cameraTransform(Vector X, Vector Y, Vector Z, Point p) {
     Y = normalize(Y);
     Z = normalize(Z);
     // Transforms a basis so its axes are mapped to i, j, k.
-    Matrix rigidBodyTransformation(X.x, Y.x, Z.x, 0,
-                                   X.y, Y.y, Z.y, 0,
-                                   X.z, Y.z, Z.z, 0,
+    Matrix rigidBodyTransformation(X.x, X.y, X.z, 0,
+                                   Y.x, Y.y, Y.z, 0,
+                                   Z.x, Z.y, Z.z, 0,
                                    0, 0, 0, 1);
     return rigidBodyTransformation * p_to_origin;
 }

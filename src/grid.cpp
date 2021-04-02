@@ -2,6 +2,7 @@
 #include "plane.h"
 #include <iostream>
 #include "matrix.h"
+#include "render.h"
 
 GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{255, 255, 255, 255}), temperatureKelvin(0), slopeDeg(0), height(0) {}
 GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, double slopeDeg_, double height_)
@@ -102,59 +103,91 @@ Plane Grid::backPlane() const {
     return Plane(system_.center + -system_.axisZ * cellSize_/2 * rows_, -system_.axisZ);
 }
 
-void Grid::render(SDL_Surface* canvas, SDL_Rect viewPortRect, Basis camera) {
-    const Matrix cameraMatrix = cameraTransform(camera.axisX, camera.axisY, camera.axisZ, camera.center);
-    const double focalDistance = 120;
-    // Screen rect is the rectangle in the camera space that represents what the camera currently sees.
-    // Growing this rectangle zooms the camera out.
-    const SDL_Rect screenRect = {-63, -63, 125, 125};
+void Grid::render(const Renderer& r) const {
+    r.renderPoint(lattice.begin(), lattice.end());
+}
 
-    const Matrix projectionMatrix = ::projectionMatrix(focalDistance, screenRect, viewPortRect);
-
-    uint32_t* const pixels = static_cast<uint32_t*>(canvas->pixels);
-
-    for (const GridPoint& currentPoint: lattice) {
-        Point p = currentPoint;
-        // std::cout << p << '\n';
-
-        p = cameraMatrix * p;
-        if (p.z < 0) {
-            continue;
-        }
-        p = projectionMatrix * p;
-
-        // Any point out of bounds of the view rectangle is skipped.
-        if (p.x < viewPortRect.x ||
-            p.y < viewPortRect.y ||
-            p.x >= viewPortRect.x + viewPortRect.w ||
-            p.y >= viewPortRect.y + viewPortRect.h) {
-                continue;
-        }
-
-        // Render points that weren't skipped.
-        // Offset formula:
-        // width*y+x
-        unsigned int offset = canvas->w * static_cast<unsigned int>(p.y) + static_cast<unsigned int>(p.x);
-        pixels[offset] = SDL_MapRGBA(canvas->format, currentPoint.color.r, currentPoint.color.g, currentPoint.color.b, currentPoint.color.a);
-
-        /* // Temporary: make the pixels much bigger to see better.
-        const int pixelSize = 7;
-        SDL_Rect pixelRect = {static_cast<int>(p.x) - pixelSize/2,
-                              static_cast<int>(p.y) - pixelSize/2,
-                              pixelSize,
-                              pixelSize};
-        SDL_Rect intersection;
-        if (SDL_IntersectRect(&viewPortRect, &pixelRect, &intersection)) {
-            SDL_FillRect(canvas,
-                         &pixelRect,
-                         SDL_MapRGBA(canvas->format,
-                                     currentPoint.color.r,
-                                     currentPoint.color.g,
-                                     currentPoint.color.b,
-                                     currentPoint.color.a));
-           //std::cout << p << '\n';
-
-        } */
-
+std::tuple<double, double, double> Grid::gridLocation(Point p) const {
+    Plane P = gridPlane();
+    // Guarantees that the ray will hit the grid, no matter how far you are from it;
+    double rayDistance = (distance(system_.center, p) * 2);
+    Point pointPastPlane = p + -P.whichSide(p) * P.normalVector() * rayDistance;
+    auto op = P.pointOfIntersection(p, pointPastPlane);
+    if (!op) {
+        throw std::runtime_error("Internal error: line segment didn't hit plane.");
+    } else {
+        // std::cout << "Point where gridplane is intersected: " << *op << "\n";
     }
+
+    // Calculate the height of p from the gridPlane (P).
+    double h = distance(p, *op);
+
+    // Use the cameraTransform function to transform the grid's basis to i, j, k origin.
+    // This will give us a matrix that will transform p into a new point, p'.
+    // p' will be used for the parameters of interpolation.
+    Point pPrime = cameraTransform(system_.axisX, system_.axisY, system_.axisZ, system_.center) * p;
+    // std::cout << "pPrime: " << pPrime << "\n";
+
+    double v = pPrime.x / (cellSize_ * (columns_ + 1));
+    double u = pPrime.z / (cellSize_ * (rows_ + 1));
+    return std::make_tuple(u + 0.5, v + 0.5, h);
+
+}
+
+Point Grid::findFloor(double u, double v) const {
+    if (u < 0) {
+        u = 0;
+    }
+    if (v < 0) {
+        v = 0;
+    }
+
+    if (u > 1) {
+        u = 1;
+    }
+    if (v > 1) {
+        v = 1;
+    }
+
+    double row = u * (rows_);
+    double column = v * (columns_);
+
+    auto index = [this] (int column, int row) {
+        return (this->columns_ + 1) * row + column;
+    };
+
+    // Calculate the four corners of the current "patch".
+    // Patch is the current grid cell the point (u, v) is in.
+    GridPoint ul = lattice.at(index(floor(column), floor(row)));
+    const double u_ul = floor(u / rows_) * rows_;
+    const double v_ul = floor(u / columns_) * columns_;
+
+    GridPoint ur = lattice.at(index(ceil(column), floor(row)));
+    const double u_ur = floor(u / rows_) * rows_;
+    const double v_ur = ceil(u / columns_) * columns_;
+
+    GridPoint ll = lattice.at(index(floor(column), ceil(row)));
+    const double u_ll = ceil(u / rows_) * rows_;
+    const double v_ll = floor(u / columns_) * columns_;
+
+    GridPoint lr = lattice.at(index(ceil(column), ceil(row)));
+    const double u_lr = ceil(u / rows_) * rows_;
+    const double v_lr = ceil(u / columns_) * columns_;
+
+    // Calculate upper horizontal parameter of interpolation.
+    const double s_top = (v - v_ul) / (v_ur - v_ul);
+
+    // Calculate lower horizontal parameter of interpolation.
+    const double s_bottom = (v - v_ll) / (v_lr - v_ll);
+
+    // Calculate vertical parameter of interpolation.
+    const double r = (u - u_ul) / (u_ll - u_ul);
+
+    Point upper = ul + s_top * (ur - ul);
+    Point lower = ll + s_bottom * (lr - ll);
+
+    Point resultPoint = upper + r * (lower - upper);
+
+    return resultPoint;
+
 }
