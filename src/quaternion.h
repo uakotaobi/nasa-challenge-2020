@@ -4,6 +4,39 @@
 #include <iostream>
 #include "matrix.h"
 
+// What in the world is a quaternion?
+//
+// You may think of them as a sort of 3D version of complex numbers.  Instead
+// of existing in a 2-space (ℂ, the complex plane) with a real axis and an
+// imaginary axis, they exist in a four-dimensional space called ℍ with one
+// real axis and three imaginary axes: 𝐢, 𝐣, and 𝐤.  These unit vectors have the
+// unusual property 𝐢² = 𝐣² = 𝐤² = 𝐢𝐣𝐤 = -1.
+//
+// There are all sorts of things you can do with these, but we only use them
+// to represent 3D rotations around vectors.  Suppose I have a basis with
+// three axes (axisX, axisY, and axisZ), and I wish to rotate a point p by
+// yaw° around axisY AND pitch° around axisX.  I can accomplish this as
+// follows:
+//
+//   p -= Vector(basis.center);                              // Translate to origin
+//   Quaternion q1 = rotationQuaternion(basis.axisY, yaw);   // Azimuth rotation
+//   Quaternion q2 = rotationQuaternion(basis.axisX, pitch); // Elevation rotation
+//   p = rotate(p, q2 * q1);                                 // Composite rotation: azimuth, THEN elevation
+//   p += Vector(basis.center);                              // Translate from origin
+//
+// Should you wish to repeat the rotations across a large number of points,
+// you can also extract matrices from the rotation quaternion:
+//
+//   Matrix toOrigin = translationMatrix(-Vector(basis.center));
+//   Quaternion q1 = rotationQuaternion(basis.axisY, yaw);
+//   Quaternion q2 = rotationQuaternion(basis.axisX, pitch);
+//   Matrix fromOrigin = translationMatrix(Vector(basis.center));
+//   Matrix composite = fromOrigin * rotationMatrix(q2 * q1) * toOrigin;
+//   p = composite * p;
+//
+// Unlike Euler angles, these rotations are numerically stable, no matter how
+// many are applied and no matter which order.  Quaternion rotations are not
+// subject to gimbal lock.
 struct Quaternion {
 
         double realPart;
