@@ -115,6 +115,7 @@ struct Quaternion {
         friend std::ostream& operator<<(std::ostream& out, Quaternion q);
 };
 
+// It may be a friend, but it still has to be declared extern separately.
 extern Quaternion rotationQuaternion(Vector axis, double thetaDeg);
 
 
