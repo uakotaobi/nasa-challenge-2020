@@ -4,13 +4,14 @@
 #include <iostream>
 #include "matrix.h"
 
+
 // What in the world is a quaternion?
 //
 // You may think of them as a sort of 3D version of complex numbers.  Instead
 // of existing in a 2-space (ℂ, the complex plane) with a real axis and an
-// imaginary axis, they exist in a four-dimensional space called ℍ with one
-// real axis and three imaginary axes: 𝐢, 𝐣, and 𝐤.  These unit vectors have the
-// unusual property 𝐢² = 𝐣² = 𝐤² = 𝐢𝐣𝐤 = -1.
+// imaginary axis, they exist in a four-dimensional vector space called ℍ with
+// one real axis and three imaginary axes: 𝐢, 𝐣, and 𝐤.  These unit vectors
+// have the unusual property 𝐢² = 𝐣² = 𝐤² = 𝐢𝐣𝐤 = -1.
 //
 // There are all sorts of things you can do with these, but we only use them
 // to represent 3D rotations around vectors.  Suppose I have a basis with
