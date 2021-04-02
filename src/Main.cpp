@@ -348,11 +348,8 @@ int main() {
                         int newWidth = event.window.data1;
                         int newHeight = event.window.data2;
                         surf = SDL_CreateRGBSurfaceWithFormat(0, newWidth, newHeight, 32, SDL_PIXELFORMAT_RGBA32);
-                        if (currentView == 0) {
                             menuView.handleResize(surf);
-                        } else {
                             mainView.handleResize(surf);
-                        }
                     }  else if (event.window.event == SDL_WINDOWEVENT_EXPOSED) {
                         // The window was exposed and should be repainted.
                         redraw = true;
