@@ -108,44 +108,6 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
          }
      }
      return finalResult;
-
-     // // Did our foot fall through the floor?
-     // if (groundPlane.whichSide(footPoint) < -epsilon) {
-     //     // Yes it did- BOUNCE.
-     //     finalResult = bounceDecay * groundPlane.reflection(verticalMotion);
-     //     // Make sure we end up above the groundPlane.
-     //     finalResult += groundPoint - footPoint;
-     //     cout << "Units below groundPlane: " << distance(footPoint, groundPoint) << "\n";
-     // } else if (groundPlane.whichSide(footPoint) > epsilon) {
-     //     // Fall.
-     //     finalResult = -normalize(grid.system().axisY) * gravitationalAcceleration;
-     //     Point p = footPoint + finalResult;
-     //     if (groundPlane.whichSide(p) < 0) {
-     //         finalResult = (groundPoint - footPoint);
-     //     }
-     // }
-     // return finalResult;
-}
-
-// Reorients the camera so its vertical direction is equal to the absolute Y-axis
-Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
-    double thetaCamera;
-    double thetaAbsoluteAxisY;
-    if (abs(camera.axisY.x) < epsilon && abs(camera.axisY.y) < epsilon) {
-        // camera.axisY just is parallel to the absolute z axis.
-        thetaCamera = atan2(camera.axisY.y, camera.axisY.z) * rad_to_deg;
-        thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.z) * rad_to_deg;
-    } else {
-        // This is our normal case.
-        thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
-        thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
-    }
-    // std::cout << "thetaCamera: " << thetaCamera << ", ";
-    // std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
-
-    Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
-    camera.apply(m);
-    return camera;
 }
 
 // Gets the floor point coordinate beneath camera (debugging)
@@ -235,13 +197,10 @@ int main() {
     }
 
     bool redraw;
-    int previousMouseX = -1;
-    int previousMouseY = -1;
-    SDL_GetMouseState(&previousMouseX, &previousMouseY);
     double yawDeg = 0;    // Rotation with respect to absolute Y axis in degrees
     double pitchDeg = 0;  // Rotation with respect to absolute X axis in degrees
     double rollDeg = 0;   // Rotation with respect to absolute Z axis in degrees
-    const double pixelsToDegrees = .75;   // Mouse's pixel movement to rotation degrees ratio
+    const double pixelsToDegrees = .35;   // Mouse's pixel movement to rotation degrees ratio
 
     map<int, bool> pressedKeys;
 
@@ -401,12 +360,32 @@ int main() {
                 redraw = true;
             }
         }
+
+        if (pressedKeys[SDLK_LEFT]) {
+            if (currentView == 1) {
+                currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+            }
+        }
+
+        if (pressedKeys[SDLK_RIGHT]) {
+            if (currentView == 1) {
+                currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+            }
+        }    
+
         // Handle camera movement
         // Euler angles are only useful if they are done relative to the absolute frame of reference.
         Basis camera = {};
         Matrix actualCameraLocation = translationMatrix(Vector(mainView.getCamera().center));
         Matrix absoluteOrientation = eulerRotationMatrix(camera, yawDeg, pitchDeg, rollDeg);
         camera.apply(actualCameraLocation * absoluteOrientation);
+        
+        // Make sure that we move along the ground, even when our movement vector is
+        // facing away from the ground, so we don't fly vertically when we are just walking.
+        Plane gridPlane = mainView.getGrid().gridPlane();
+        Vector gridVector = gridPlane.projection(velocity);
+        velocity = gridVector;
+        
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
@@ -425,13 +404,8 @@ int main() {
         //     thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         // }
 
-        // Rotating according to a and d keys
-        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
-        // camera.axisX = normalize(camera.axisX);
-        // camera.axisY = normalize(camera.axisY);
-        // camera.axisZ = normalize(camera.axisZ);
-        // camera = unRollCamera(mainView.getGrid().system().axisY, camera);
-
+        // Rotating according to the left and right arrow keys.
+        yawDeg -= currentTurningRate;
 
         mainView.setCamera(camera);
 

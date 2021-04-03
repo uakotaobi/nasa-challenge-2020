@@ -39,7 +39,8 @@ struct Plane {
     // Returns nullopt if line is parallel to the plane.
     std::optional<Point> pointOfIntersection(Point p1, Point p2) const;
 
-    // Returns the projection of onto this plane, in other words it returns the component of v which is parallel to this plane.
+    // Returns the projection of v onto this plane, in other words it returns
+    // the component of v which is parallel to this plane.
     Vector projection(Vector v) const;
 
     // Returns the smallest distance between "p" and the Plane.
