@@ -270,8 +270,11 @@ int main() {
     int previousMouseX = -1;
     int previousMouseY = -1;
     SDL_GetMouseState(&previousMouseX, &previousMouseY);
-    double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
-    double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
+
+    // TODO: We should make these variables start oriented to the grid's basis.
+    double yawDeg = 0;                  // Camera rotation around the absolute vertical axis (degrees)
+    double pitchDeg = 0;                // Camera rotation around the absolute horizontal axis (degrees)
+    double rollDeg = 0;                 // Camera rotation around the absolute depth axis (degrees)
     const double pixelsToDegrees = .45;  // Mouse's pixel movement to rotation degrees ratio
 
     map<int, bool> pressedKeys;
@@ -314,8 +317,6 @@ int main() {
 
     while (currentView >= 0) {
         redraw = false;
-        thetaTilt = 0;
-        thetaAzimuth = 0;
 
         if (currentView == 1) {
             // SDL_ShowCursor(SDL_DISABLE);
@@ -357,19 +358,35 @@ int main() {
                     break;
                 case SDL_MOUSEMOTION:
                     if (currentView != 0) {
-                        if ((previousMouseX != -1 || previousMouseY != -1) &&
-                            (event.motion.x >= 0 && event.motion.x < surf->w && event.motion.y >= 0 && event.motion.y < surf->h)) {
-                            double deltaX = event.motion.x - previousMouseX;
-                            double deltaY = event.motion.y - previousMouseY;
-                            thetaTilt = (deltaY) * pixelsToDegrees;
-                            thetaAzimuth = (deltaX) * pixelsToDegrees;
+                        if (event.motion.x >= 0 && event.motion.x < surf->w && event.motion.y >= 0 && event.motion.y < surf->h) {
+                            // The mouse has moved in frame.
+                            if (previousMouseX == -1 && previousMouseY == -1) {
+                                // First time moving the mouse.  Do NOTHING;
+                                // that way, the old mouse position is set to
+                                // where the mouse currently is, preventing
+                                // surprising jumps the first time the mouse
+                                // moves for real.
+                                //
+                                // Yeah, we do lost a frame of mouse movement
+                                // from this.  But it's worth it.
+                            } else {
+                                // previousMouseX and previousMouseY have
+                                // sensible values, so now we can use them.
+                                double deltaX = event.motion.xrel;
+                                double deltaY = event.motion.yrel;
+                                pitchDeg += (deltaY) * pixelsToDegrees;
+                                yawDeg += (deltaX) * pixelsToDegrees;
+                                std::cout.precision(2);
+                                std::cout << std::fixed;
+                                std::cout << "Previous mouse position: (" << previousMouseX << ", " << previousMouseY << ") :: ";
+                                std::cout << "camera.center: " << mainView.getCamera().center << " :: ";
+                                std::cout << "Yaw: " << yawDeg << "° (" << (deltaX < 0 ? "" : "+") << deltaX * pixelsToDegrees << "), ";
+                                std::cout << "Pitch: " << pitchDeg << "° (" << (deltaY < 0 ? "" : "+") << deltaY * pixelsToDegrees << ")\n";
+                            }
 
-                            std::cout << "event.motion.x: " << event.motion.x
-                                      << ", event.motion.y: " << event.motion.y << "\n";
+                            previousMouseX = event.motion.x;
+                            previousMouseY = event.motion.y;
                         }
-
-                        previousMouseX = event.motion.x;
-                        previousMouseY = event.motion.y;
                     }
                     redraw = true;
                     break;
@@ -443,8 +460,19 @@ int main() {
                 redraw = true;
             }
         }
+
+        // For Euler rotation to work, the Euler angles (yaw, pitch, and roll)
+        // have to take primacy.  That means that our camera basis must be
+        // derived from them instead of being maintained separately.
+        Basis camera = Basis();
+
+        // But we do need to at least move to the spot where the old camera
+        // was, even if we don't care about its orientation.
+        Matrix T = translationMatrix(Vector(mainView.getCamera().center));
+        Matrix R = eulerRotationMatrix(camera, yawDeg, pitchDeg, rollDeg);
+        camera.apply(T * R); // Rotate first, then move to final spot.
+
         // Handle camera movement
-        Basis camera = mainView.getCamera();
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
@@ -455,16 +483,17 @@ int main() {
 
         // DANGER WILL ROBINSON: GIMBAL LOCK
         // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
-        double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
-        const double maxDeviationFromHorizon = 45;
-        if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
-            thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
-        } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
-            thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
-        }
+        // double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
+        // const double maxDeviationFromHorizon = 45;
+        // if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
+        //     thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
+        // } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
+        //     thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
+        // }
 
         // Rotate using the keyboard rotation rate.
-        camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
+        // camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
+        yawDeg -= currentTurningRate;
 
         // This just resulted in _worse_ roll instability.  Im actually
         // surprised at this.

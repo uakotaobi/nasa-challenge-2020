@@ -9,5 +9,8 @@ extern const double deg_to_rad;
 // Converts radians to degrees when multiplied
 extern const double rad_to_deg;
 
+// Returns -1.0 if x < 0, +1.0 if x > 0, and 0.0 otherwise.
+template <typename T>
+inline T sgn(T x) { return x < 0 ? -1.0 : x > 0 ? 1.0 : 0.0; }
 
 #endif // COMMON_H_INCLUDED
