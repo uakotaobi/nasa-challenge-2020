@@ -21,7 +21,8 @@ struct Polygon {
         Polygon(const std::vector<V>& vertexBuffer, std::initializer_list<int> indices) {
             for (auto iter = indices.begin(); iter != indices.end(); iter++) {
                 int current_index = *iter;
-                Vertex current_vertex = static_cast<Point&>(vertexBuffer[current_index]);
+                Vertex current_vertex;
+                static_cast<Point&>(current_vertex) = static_cast<Point&>(vertexBuffer[current_index]);
                 vertices.push_back(current_vertex);
             }
         }

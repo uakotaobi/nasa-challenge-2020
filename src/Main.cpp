@@ -238,8 +238,9 @@ int main() {
     int previousMouseX = -1;
     int previousMouseY = -1;
     SDL_GetMouseState(&previousMouseX, &previousMouseY);
-    double thetaTilt = 0;               // Camera tilt for the current frame (degrees)
-    double thetaAzimuth = 0;            // Camera rotation for the current frame (degrees)
+    double yawDeg = 0;    // Rotation with respect to absolute Y axis in degrees
+    double pitchDeg = 0;  // Rotation with respect to absolute X axis in degrees
+    double rollDeg = 0;   // Rotation with respect to absolute Z axis in degrees
     const double pixelsToDegrees = .75;   // Mouse's pixel movement to rotation degrees ratio
 
     map<int, bool> pressedKeys;
@@ -282,8 +283,6 @@ int main() {
 
     while (currentView >= 0) {
         redraw = false;
-        thetaTilt = 0;
-        thetaAzimuth = 0;
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -309,11 +308,8 @@ int main() {
                         int newWidth = event.window.data1;
                         int newHeight = event.window.data2;
                         surf = SDL_CreateRGBSurfaceWithFormat(0, newWidth, newHeight, 32, SDL_PIXELFORMAT_RGBA32);
-                        if (currentView == 0) {
                             menuView.handleResize(surf);
-                        } else {
                             mainView.handleResize(surf);
-                        }
                     }  else if (event.window.event == SDL_WINDOWEVENT_EXPOSED) {
                         // The window was exposed and should be repainted.
                         redraw = true;
@@ -321,15 +317,10 @@ int main() {
                     break;
                 case SDL_MOUSEMOTION:
                     if (currentView != 0) {
-                        double deltaX = event.button.x - previousMouseX;
-                        double deltaY = event.button.y - previousMouseY;
-                        thetaTilt = (deltaY) * pixelsToDegrees;
-                        thetaAzimuth = (deltaX) * pixelsToDegrees;
-
-                        double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, mainView.getCamera().axisZ);
-
-                        previousMouseX = event.button.x;
-                        previousMouseY = event.button.y;
+                        double deltaX = event.motion.xrel;
+                        double deltaY = event.motion.yrel;
+                        pitchDeg += (deltaY) * pixelsToDegrees;
+                        yawDeg += (deltaX) * pixelsToDegrees;
 
                     }
                     redraw = true;
@@ -372,14 +363,20 @@ int main() {
 
         if (pressedKeys[SDLK_a]) {
             if (currentView == 1) {
-                currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+                velocity -= normalize(mainView.getCamera().axisX) * accelerationRate;
+                if (velocity.magnitude() > maxVelocity) {
+                    velocity = normalize(velocity) * -maxVelocity;
+                }
                 redraw = true;
             }
         }
 
         if (pressedKeys[SDLK_d]) {
             if (currentView == 1) {
-                currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+                velocity += normalize(mainView.getCamera().axisX) * accelerationRate;
+                if (velocity.magnitude() > maxVelocity) {
+                    velocity = normalize(velocity) * maxVelocity;
+                }
                 redraw = true;
             }
         }
@@ -405,7 +402,11 @@ int main() {
             }
         }
         // Handle camera movement
-        Basis camera = mainView.getCamera();
+        // Euler angles are only useful if they are done relative to the absolute frame of reference.
+        Basis camera = {};
+        Matrix actualCameraLocation = translationMatrix(Vector(mainView.getCamera().center));
+        Matrix absoluteOrientation = eulerRotationMatrix(camera, yawDeg, pitchDeg, rollDeg);
+        camera.apply(actualCameraLocation * absoluteOrientation);
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
@@ -414,22 +415,22 @@ int main() {
         verticalMotion = fallingVector(camera, verticalMotion, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         camera.apply(translationMatrix(verticalMotion));
 
-        // DANGER WILL ROBINSON: GIMBAL LOCK
-        // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
-        double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
-        const double maxDeviationFromHorizon = 10;
-        if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
-            thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
-        } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
-            thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
-        }
+        // // DANGER WILL ROBINSON: GIMBAL LOCK
+        // // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
+        // double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
+        // const double maxDeviationFromHorizon = 10;
+        // if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
+        //     thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
+        // } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
+        //     thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
+        // }
 
+        // Rotating according to a and d keys
         camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
-        // camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
-        camera.axisX = normalize(camera.axisX);
-        camera.axisY = normalize(camera.axisY);
-        camera.axisZ = normalize(camera.axisZ);
-        camera = unRollCamera(mainView.getGrid().system().axisY, camera);
+        // camera.axisX = normalize(camera.axisX);
+        // camera.axisY = normalize(camera.axisY);
+        // camera.axisZ = normalize(camera.axisZ);
+        // camera = unRollCamera(mainView.getGrid().system().axisY, camera);
 
 
         mainView.setCamera(camera);
