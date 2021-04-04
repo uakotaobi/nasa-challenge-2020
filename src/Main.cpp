@@ -109,44 +109,6 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
          }
      }
      return finalResult;
-
-     // // Did our foot fall through the floor?
-     // if (groundPlane.whichSide(footPoint) < -epsilon) {
-     //     // Yes it did- BOUNCE.
-     //     finalResult = bounceDecay * groundPlane.reflection(verticalMotion);
-     //     // Make sure we end up above the groundPlane.
-     //     finalResult += groundPoint - footPoint;
-     //     cout << "Units below groundPlane: " << distance(footPoint, groundPoint) << "\n";
-     // } else if (groundPlane.whichSide(footPoint) > epsilon) {
-     //     // Fall.
-     //     finalResult = -normalize(grid.system().axisY) * gravitationalAcceleration;
-     //     Point p = footPoint + finalResult;
-     //     if (groundPlane.whichSide(p) < 0) {
-     //         finalResult = (groundPoint - footPoint);
-     //     }
-     // }
-     // return finalResult;
-}
-
-// Reorients the camera so its vertical direction is equal to the absolute Y-axis
-Basis unRollCamera(Vector absoluteAxisY, Basis camera) {
-    double thetaCamera;
-    double thetaAbsoluteAxisY;
-    if (abs(camera.axisY.x) < epsilon && abs(camera.axisY.y) < epsilon) {
-        // camera.axisY just is parallel to the absolute z axis.
-        thetaCamera = atan2(camera.axisY.y, camera.axisY.z) * rad_to_deg;
-        thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.z) * rad_to_deg;
-    } else {
-        // This is our normal case.
-        thetaCamera = atan2(camera.axisY.y, camera.axisY.x) * rad_to_deg;
-        thetaAbsoluteAxisY = atan2(absoluteAxisY.y, absoluteAxisY.x) * rad_to_deg;
-    }
-    // std::cout << "thetaCamera: " << thetaCamera << ", ";
-    // std::cout << "thetaAbsoluteAxisY: " << thetaAbsoluteAxisY << "\n";
-
-    Matrix m = rotationMatrix(camera.center, camera.center + camera.axisZ, thetaCamera - thetaAbsoluteAxisY);
-    camera.apply(m);
-    return camera;
 }
 
 // Gets the floor point coordinate beneath camera (debugging)
@@ -267,15 +229,10 @@ int main() {
     }
 
     bool redraw;
-    int previousMouseX = -1;
-    int previousMouseY = -1;
-    SDL_GetMouseState(&previousMouseX, &previousMouseY);
-
-    // TODO: We should make these variables start oriented to the grid's basis.
-    double yawDeg = 0;                  // Camera rotation around the absolute vertical axis (degrees)
-    double pitchDeg = 0;                // Camera rotation around the absolute horizontal axis (degrees)
-    double rollDeg = 0;                 // Camera rotation around the absolute depth axis (degrees)
-    const double pixelsToDegrees = .45;  // Mouse's pixel movement to rotation degrees ratio
+    double yawDeg = 0;    // Rotation with respect to absolute Y axis in degrees
+    double pitchDeg = 0;  // Rotation with respect to absolute X axis in degrees
+    double rollDeg = 0;   // Rotation with respect to absolute Z axis in degrees
+    const double pixelsToDegrees = .35;   // Mouse's pixel movement to rotation degrees ratio
 
     map<int, bool> pressedKeys;
 
@@ -358,35 +315,11 @@ int main() {
                     break;
                 case SDL_MOUSEMOTION:
                     if (currentView != 0) {
-                        if (event.motion.x >= 0 && event.motion.x < surf->w && event.motion.y >= 0 && event.motion.y < surf->h) {
-                            // The mouse has moved in frame.
-                            if (previousMouseX == -1 && previousMouseY == -1) {
-                                // First time moving the mouse.  Do NOTHING;
-                                // that way, the old mouse position is set to
-                                // where the mouse currently is, preventing
-                                // surprising jumps the first time the mouse
-                                // moves for real.
-                                //
-                                // Yeah, we do lost a frame of mouse movement
-                                // from this.  But it's worth it.
-                            } else {
-                                // previousMouseX and previousMouseY have
-                                // sensible values, so now we can use them.
                                 double deltaX = event.motion.xrel;
                                 double deltaY = event.motion.yrel;
                                 pitchDeg += (deltaY) * pixelsToDegrees;
                                 yawDeg += (deltaX) * pixelsToDegrees;
-                                std::cout.precision(2);
-                                std::cout << std::fixed;
-                                std::cout << "Previous mouse position: (" << previousMouseX << ", " << previousMouseY << ") :: ";
-                                std::cout << "camera.center: " << mainView.getCamera().center << " :: ";
-                                std::cout << "Yaw: " << yawDeg << "° (" << (deltaX < 0 ? "" : "+") << deltaX * pixelsToDegrees << "), ";
-                                std::cout << "Pitch: " << pitchDeg << "° (" << (deltaY < 0 ? "" : "+") << deltaY * pixelsToDegrees << ")\n";
-                            }
 
-                            previousMouseX = event.motion.x;
-                            previousMouseY = event.motion.y;
-                        }
                     }
                     redraw = true;
                     break;
@@ -428,14 +361,20 @@ int main() {
 
         if (pressedKeys[SDLK_a]) {
             if (currentView == 1) {
-                currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+                velocity -= normalize(mainView.getCamera().axisX) * accelerationRate;
+                if (velocity.magnitude() > maxVelocity) {
+                    velocity = normalize(velocity) * -maxVelocity;
+                }
                 redraw = true;
             }
         }
 
         if (pressedKeys[SDLK_d]) {
             if (currentView == 1) {
-                currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+                velocity += normalize(mainView.getCamera().axisX) * accelerationRate;
+                if (velocity.magnitude() > maxVelocity) {
+                    velocity = normalize(velocity) * maxVelocity;
+                }
                 redraw = true;
             }
         }
@@ -461,18 +400,38 @@ int main() {
             }
         }
 
+        if (pressedKeys[SDLK_LEFT]) {
+            if (currentView == 1) {
+                currentTurningRate = std::min(currentTurningRate + angularAccelerationRate, maxTurningRate);
+            }
+        }
+
+        if (pressedKeys[SDLK_RIGHT]) {
+            if (currentView == 1) {
+                currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
+            }
+        }
+
+        // Handle camera movement
         // For Euler rotation to work, the Euler angles (yaw, pitch, and roll)
         // have to take primacy.  That means that our camera basis must be
         // derived from them instead of being maintained separately.
-        Basis camera = Basis();
-
+        //
         // But we do need to at least move to the spot where the old camera
         // was, even if we don't care about its orientation.
-        Matrix T = translationMatrix(Vector(mainView.getCamera().center));
-        Matrix R = eulerRotationMatrix(camera, yawDeg, pitchDeg, rollDeg);
-        camera.apply(T * R); // Rotate first, then move to final spot.
 
-        // Handle camera movement
+        // Euler angles are only useful if they are done relative to the absolute frame of reference.
+        Basis camera = {};
+        Matrix actualCameraLocation = translationMatrix(Vector(mainView.getCamera().center));
+        Matrix absoluteOrientation = eulerRotationMatrix(camera, yawDeg, pitchDeg, rollDeg);
+        camera.apply(actualCameraLocation * absoluteOrientation); // Rotate first, then move to final spot.
+
+        // Make sure that we move along the ground, even when our movement vector is
+        // facing away from the ground, so we don't fly vertically when we are just walking.
+        Plane gridPlane = mainView.getGrid().gridPlane();
+        Vector gridVector = gridPlane.projection(velocity);
+        velocity = gridVector;
+
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
@@ -481,43 +440,18 @@ int main() {
         verticalMotion = fallingVector(camera, verticalMotion, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         camera.apply(translationMatrix(verticalMotion));
 
-        // DANGER WILL ROBINSON: GIMBAL LOCK
-        // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
+        // // DANGER WILL ROBINSON: GIMBAL LOCK
+        // // This prevents gimbal lock by stopping you from tilting to 180 or 0 degrees like to the Grid's z axis
         // double currentElevation = calculateAbsoluteElevation(mainView.getGrid().system().axisY, camera.axisZ);
-        // const double maxDeviationFromHorizon = 45;
+        // const double maxDeviationFromHorizon = 10;
         // if (currentElevation + thetaTilt >= 90 + maxDeviationFromHorizon) {
         //     thetaTilt = 90 + maxDeviationFromHorizon - currentElevation;
         // } else if (currentElevation + thetaTilt <= 90 - maxDeviationFromHorizon) {
         //     thetaTilt = 90 - maxDeviationFromHorizon - currentElevation;
         // }
 
-        // Rotate using the keyboard rotation rate.
-        // camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, currentTurningRate));
+        // Rotating according to the left and right arrow keys.
         yawDeg -= currentTurningRate;
-
-        // This just resulted in _worse_ roll instability.  Im actually
-        // surprised at this.
-        //
-        //     camera.apply(rotationMatrix(camera.center, camera.center + mainView.getGrid().system().axisY, thetaAzimuth));
-        //     camera.apply(rotationMatrix(camera.center, camera.center + camera.axisX, thetaTilt));
-        //
-        // And here, we tried using the Euler rotations matrices.  They sucked.
-        //
-        //     camera.apply(eulerRotationMatrix(camera, thetaAzimuth * 1, thetaTilt * 1, 0));
-        //
-        // Let's try it using Quaternions.
-        // Matrix toOrigin = translationMatrix(-Vector(camera.center));
-        // Quaternion q1 = rotationQuaternion(mainView.getGrid().system().axisY, thetaAzimuth);
-        // Quaternion q2 = rotationQuaternion(camera.axisX, thetaTilt);
-        // Matrix fromOrigin = translationMatrix(Vector(camera.center));
-        // camera.apply(fromOrigin * rotationMatrix(q2 * q1) * toOrigin);
-        // camera = unRollCamera(mainView.getGrid().system().axisY, camera);
-
-
-        camera.axisX = normalize(camera.axisX);
-        camera.axisY = normalize(camera.axisY);
-        camera.axisZ = normalize(camera.axisZ);
-
 
         mainView.setCamera(camera);
 
