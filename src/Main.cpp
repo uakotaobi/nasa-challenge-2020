@@ -339,7 +339,7 @@ int main() {
             }
         }
 
-        if (pressedKeys[SDLK_w]) {
+        if (pressedKeys[SDLK_w] || pressedKeys[SDLK_UP]) {
             if (currentView == 1) {
                 velocity += normalize(mainView.getCamera().axisZ) * accelerationRate;
                 if (velocity.magnitude() > maxVelocity) {
@@ -349,7 +349,7 @@ int main() {
             }
         }
 
-        if (pressedKeys[SDLK_s]) {
+        if (pressedKeys[SDLK_s] || pressedKeys[SDLK_DOWN]) {
             if (currentView == 1) {
                 velocity -= normalize(mainView.getCamera().axisZ) * accelerationRate;
                 if (velocity.magnitude() > maxVelocity) {
@@ -430,8 +430,10 @@ int main() {
         // facing away from the ground, so we don't fly vertically when we are just walking.
         Plane gridPlane = mainView.getGrid().gridPlane();
         Vector gridVector = gridPlane.projection(velocity);
-        velocity = gridVector;
-
+        if (gridVector.magnitude() > epsilon) {
+            // Movements should be parallel to the grid plane, even if we are tilted.
+            velocity = velocity.magnitude() * normalize(gridVector);
+        }
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
