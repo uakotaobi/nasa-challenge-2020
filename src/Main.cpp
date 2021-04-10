@@ -89,15 +89,21 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
 
      Point footPoint = camera.center + down * heightFromFloor;
 
-     // Are we too close to ground and not boosting?
      if (abs(groundPlane.whichSide(footPoint)) < falling_epsilon) {
-         const double dot = dotProduct(normalize(verticalMotion), down);
-         if (dot > 0 && dot <= 1) {
-             // We're falling, and we're on the ground, so stop falling.
-         return Vector{0, 0, 0};
-         }
-         // We're boosting, so keep doing that.
+         // We are too close to the ground.
+         if (verticalMotion.magnitude() > epsilon) {
+             const double dot = dotProduct(normalize(verticalMotion), up);
+             if (dot >= 0) {
+                 // We are on the ground and boosting, so allow the boosting
+                 // to continue.
          return verticalMotion;
+             }
+         }
+
+         // If control made it here, we're on the ground and not boosting
+         // (note that falling counts as "not boosting"), so we shouldn't have
+         // vertical motion.
+         return Vector{0, 0, 0};
      } else if (groundPlane.whichSide(footPoint) < 0) {
          // Our feet went through the pavement.
          finalResult = groundPoint - footPoint;
