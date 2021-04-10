@@ -132,43 +132,6 @@ Point getFloor(Point cameraCenter, const Grid& moonGrid) {
     return p;
 }
 
-double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) {
-     absoluteAxisY = normalize(absoluteAxisY);
-     cameraDirection = normalize(cameraDirection);
-     return acos(dotProduct(absoluteAxisY, cameraDirection)) * rad_to_deg;
-}
-
-// Returns a rotation matrix that reorients the given Basis so that its axisY
-// points "up" (i.e., so its axisY is parallel to absoluteAxisY.)
-//
-//              AbsoluteAxisY
-//           |   ,'
-// j (y-axis)|   |
-//           |  ,'
-//           |  |
-//           | ,'
-//           | |        __..--'"
-//           |,'__..--'"   camera.axisY
-// ----------+------------------> i (x-axis)
-//           |
-//
-// atan2(camera.axisY.y, camera.axisY.x) is the angle between the camera's YZ
-// plane and the true XZ plane.
-//
-// atan2(camera.absoluteAxisY.y, camera.absoluteAxisX.x) is the angle between
-// the absolute (read: grid)'s YZ plane and the true XZ plane.
-//
-// Their difference is how much we need to rotate along the camera.axisZ in
-// order to reorient ourselves.
-Matrix correctVerticalOrientation(Vector absoluteAxisY, Basis camera) {
-    double thetaCamera = atan2(camera.axisY.y, camera.axisY.x);
-    double thetaAbsolute = atan2(absoluteAxisY.y, absoluteAxisY.x);
-    const double RADIANS_TO_DEGREES = 180 / 3.141593;
-    return rotationMatrix(camera.center,
-                          camera.center + camera.axisZ,
-                          -RADIANS_TO_DEGREES * (thetaAbsolute - thetaCamera));
-}
-
 void debugPrint() {
     // Basis standard;
     // double pitch = 0;
