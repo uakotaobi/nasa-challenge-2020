@@ -371,7 +371,6 @@ int main() {
                 if (boostingAllowed) {
                     verticalMotion += up * gravitationalAcceleration * boosterPower;
                 }
-                redraw = true;
             }
         }
 
@@ -434,8 +433,8 @@ int main() {
 
         velocity *= frictionDecay;
         currentTurningRate *= turningFrictionDecay;
-        // Animate sliding / turning
-        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0) {
+        // Animate sliding / turning / falling
+        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0 || verticalMotion.magnitude() > epsilon) {
             redraw = true;
         }
         if (redraw) {
