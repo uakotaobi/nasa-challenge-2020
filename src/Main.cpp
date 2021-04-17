@@ -80,7 +80,7 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
      const Vector up = normalize(grid.system().axisY);
      const Vector down = -up;
      const double falling_epsilon = 0.01;
-     const double bounceDecay = 0.50;
+     const double bounceDecay = 0.10;
      Point groundPoint = getFloor(camera.center, grid);
 
      // The groundPlane is ALWAYS parallel to the grid.gridPlane().
@@ -90,7 +90,14 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
 
      // Are we too close to ground?
      if (abs(groundPlane.whichSide(footPoint)) < falling_epsilon) {
-         return Vector{0, 0, 0};
+
+         if (dotProduct(verticalMotion, up) > 0) {
+             // Vertical motion is trying to go upwards.
+             return verticalMotion;
+         } else {
+             // Vertical motion is going sideways, downwards, or nonexistence
+             return Vector{0, 0, 0};
+         }
      } else if (groundPlane.whichSide(footPoint) < 0) {
          // Our feet went through the pavement.
          finalResult = groundPoint - footPoint;
@@ -196,7 +203,7 @@ int main() {
         return 1;
     }
 
-    bool redraw;
+    bool redraw;          // Set to true when we need to render the current frame
     double yawDeg = 0;    // Rotation with respect to absolute Y axis in degrees
     double pitchDeg = 0;  // Rotation with respect to absolute X axis in degrees
     double rollDeg = 0;   // Rotation with respect to absolute Z axis in degrees
@@ -371,7 +378,7 @@ int main() {
             if (currentView == 1) {
                 currentTurningRate = std::max(currentTurningRate - angularAccelerationRate, -maxTurningRate);
             }
-        }    
+        }
 
         // Handle camera movement
         // Euler angles are only useful if they are done relative to the absolute frame of reference.
@@ -379,13 +386,13 @@ int main() {
         Matrix actualCameraLocation = translationMatrix(Vector(mainView.getCamera().center));
         Matrix absoluteOrientation = eulerRotationMatrix(camera, yawDeg, pitchDeg, rollDeg);
         camera.apply(actualCameraLocation * absoluteOrientation);
-        
+
         // Make sure that we move along the ground, even when our movement vector is
         // facing away from the ground, so we don't fly vertically when we are just walking.
         Plane gridPlane = mainView.getGrid().gridPlane();
         Vector gridVector = gridPlane.projection(velocity);
         velocity = gridVector;
-        
+
         Vector momentaryVelocity = detectCollision(camera, velocity, mainView.getGrid(), heightFromFloor, gravitationalAcceleration);
         velocity = momentaryVelocity;
         camera.apply(translationMatrix(momentaryVelocity));
@@ -412,7 +419,7 @@ int main() {
         velocity *= frictionDecay;
         currentTurningRate *= turningFrictionDecay;
         // Animate sliding / turning
-        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0) {
+        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0 || verticalMotion.magnitude() > 0) {
             redraw = true;
         }
         if (redraw) {
