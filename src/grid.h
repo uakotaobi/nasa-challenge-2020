@@ -34,10 +34,10 @@ class Grid {
         // - cellSize: the space between grid cells according to the grid's own basis
         Grid(int rows, int columns, double cellSize = 1.0 );
 
-
+        // This is for representing a position in the grid using a sum of multiples of the three axes. 
         Basis system() const;
 
-        // Gets the number of divsisions of the grid in the system.axisZ direction.
+        // Gets the number of divisions of the grid in the system.axisZ direction.
         double rows() const;
 
         // Gets the number of divisions of the grid in the system.axisX direction.
@@ -96,6 +96,10 @@ class Grid {
         // 0 <= v <= 1
         // 0 <= u <= 1
         Point findFloor(double u, double v) const;
+        
+        // Applies matrix to the entire grid
+        void apply(const Matrix& transformationMatrix);
+        
     private:
         std::vector<GridPoint> lattice;
         Basis system_;
@@ -103,7 +107,7 @@ class Grid {
         double cellSize_;
         void setLatticePoints();
 
-
+    
 
 };
 

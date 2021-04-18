@@ -187,7 +187,16 @@ Point Grid::findFloor(double u, double v) const {
     Point lower = ll + s_bottom * (lr - ll);
 
     Point resultPoint = upper + r * (lower - upper);
+    
 
     return resultPoint;
 
+}
+
+void Grid::apply(const Matrix& transformationMatrix) {
+    // Change the basis.
+    system_.apply(transformationMatrix);
+    
+    // Change the lattice points.
+    setLatticePoints();
 }
