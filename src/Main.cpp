@@ -81,7 +81,7 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
      const Vector up = normalize(grid.system().axisY);
      const Vector down = -up;
      const double falling_epsilon = 0.01;
-     const double bounceDecay = 0.50;
+     const double bounceDecay = 0.10;
      Point groundPoint = getFloor(camera.center, grid);
 
      // The groundPlane is ALWAYS parallel to the grid.gridPlane().
@@ -90,17 +90,16 @@ Vector fallingVector(Basis& camera, Vector verticalMotion, const Grid& grid,
      Point footPoint = camera.center + down * heightFromFloor;
 
      if (abs(groundPlane.whichSide(footPoint)) < falling_epsilon) {
-         // We are too close to the ground.
-         if (dotProduct(verticalMotion, up) >= 0) {
-                 // We are on the ground and boosting, so allow the boosting
-                 // to continue.
-         return verticalMotion;
-             }
-
-         // If control made it here, we're on the ground and not boosting
-         // (note that falling counts as "not boosting"), so we shouldn't have
-         // vertical motion.
-         return Vector{0, 0, 0};
+         if (dotProduct(verticalMotion, up) > 0) {
+             // We are on the ground and boosting, so allow the boosting to
+             // continue.
+             return verticalMotion;
+         } else {
+             // If control made it here, we're on the ground and not boosting
+             // (note that falling counts as "not boosting"), so we shouldn't
+             // have vertical motion.
+             return Vector{0, 0, 0};
+         }
      } else if (groundPlane.whichSide(footPoint) < 0) {
          // Our feet went through the pavement.
          finalResult = groundPoint - footPoint;
@@ -200,7 +199,7 @@ int main() {
         return 1;
     }
 
-    bool redraw;
+    bool redraw;          // Set to true when we need to render the current frame
     double yawDeg = 0;    // Rotation with respect to absolute Y axis in degrees
     double pitchDeg = 0;  // Rotation with respect to absolute X axis in degrees
     double rollDeg = 0;   // Rotation with respect to absolute Z axis in degrees
@@ -430,8 +429,8 @@ int main() {
 
         velocity *= frictionDecay;
         currentTurningRate *= turningFrictionDecay;
-        // Animate sliding / turning / falling
-        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0 || verticalMotion.magnitude() > epsilon) {
+        // Animate sliding / turning
+        if (velocity.magnitude() > 0 || abs(currentTurningRate) > 0 || verticalMotion.magnitude() > 0) {
             redraw = true;
         }
         if (redraw) {
