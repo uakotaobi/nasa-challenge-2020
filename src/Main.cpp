@@ -18,6 +18,7 @@
 #include "vector.h"
 #include "quaternion.h"
 #include "render.h"
+#include "polygon.h"
 
 using namespace std;
 
@@ -151,9 +152,28 @@ void debugPrint() {
     Point p2(598, -291, 0);
     Point p3(23, 56, 0);
     Plane plane(p1, p2, p3);
-    std::cout.precision(12);
+    std::cout.precision(2);
+    std::cout << std::fixed;
     std::cout << "plane equation: " << plane.A << "x + " << plane.B << "y + " << plane.C << "z + " << plane.D << "= 0 \n";
 
+    // auto poly = triangle(Point{-100, 0, 0},
+    //                      Point{0, 100, 0},
+    //                      Point{100, 0, 0},
+    //                      SDL_Color{255,255,255,255});
+    auto poly = Polygon({
+                             Point(-100, -100, 0),
+                             //Point(-50, 50, 0),
+                             Point(0, 100, 0),
+                             //Point(0, -50, 0),
+                             //Point(50, 50, 0),
+                             Point(100, -100, 0)
+                        },
+                        {0, 1, 2});
+    poly.vertices[0].visible = true;
+    poly.vertices[1].visible = false;
+    Plane clip_plane(0, -1, 0, 0); // Plane -y = 0
+    std::cout << poly;
+    std::cout << *poly.clip(clip_plane);
 }
 
 int main() {
