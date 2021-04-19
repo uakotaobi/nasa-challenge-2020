@@ -11,6 +11,8 @@ struct Vertex : public Point {
         SDL_Color color = {0, 255, 0, 255}; // Green by default.
 };
 
+// This class represents a 3-D polygon. Ultimately, this class is going to represent
+// the triangles that we will subdivide the grid into.
 struct Polygon {
     public:
         std::vector<Vertex> vertices;
@@ -31,6 +33,11 @@ struct Polygon {
 
         // For backface calling. Flips the polygon's normal vector that is facing the wrong way.
         void flip();
+
+        // Remove parts of this polygon that are not on the same side of the clipPlane as its normal.
+        std::vector<Polygon> clip(Plane clipPlane) const;
+
+        friend std::ostream& operator<<(std::ostream&, Polygon polygon);
 };
 
 #endif // POLYGON_H_INCLUDED

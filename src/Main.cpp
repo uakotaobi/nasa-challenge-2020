@@ -247,8 +247,9 @@ int main() {
         return SDL_Color{x, y, squarert, 255};
     });
 
-    Matrix gridRotationMatrix = rotationMatrix(mainView.getGrid().system().center, Point {7,49,7}, 75);
-    
+    // Matrix gridRotationMatrix = rotationMatrix(mainView.getGrid().system().center, Point {7,49,7}, 75);
+    // mainView.getGrid().apply(gridRotationMatrix);
+
     while (currentView >= 0) {
         redraw = false;
         SDL_Event event;
