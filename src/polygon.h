@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <vector>
+#include <optional>
 #include "point.h"
 #include "SDL.h"
 
@@ -35,7 +36,7 @@ struct Polygon {
         void flip();
 
         // Remove parts of this polygon that are not on the same side of the clipPlane as its normal.
-        std::vector<Polygon> clip(Plane clipPlane) const;
+        std::optional<Polygon> clip(Plane clipPlane) const;
 
         friend std::ostream& operator<<(std::ostream&, Polygon polygon);
 };
