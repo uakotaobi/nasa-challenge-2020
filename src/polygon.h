@@ -6,6 +6,7 @@
 #include <optional>
 #include "point.h"
 #include "SDL.h"
+#include "plane.h"
 
 struct Vertex : public Point {
     public:
@@ -38,7 +39,8 @@ struct Polygon {
         // Remove parts of this polygon that are not on the same side of the clipPlane as its normal.
         std::optional<Polygon> clip(Plane clipPlane) const;
 
-        friend std::ostream& operator<<(std::ostream&, Polygon polygon);
+        // Print the polygon to a stream.
+        friend std::ostream& operator<<(std::ostream&, const Polygon& polygon);
 };
 
 #endif // POLYGON_H_INCLUDED
