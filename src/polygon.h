@@ -26,7 +26,7 @@ struct Polygon {
             for (auto iter = indices.begin(); iter != indices.end(); iter++) {
                 int current_index = *iter;
                 Vertex current_vertex;
-                static_cast<Point&>(current_vertex) = static_cast<Point&>(vertexBuffer[current_index]);
+                static_cast<Point&>(current_vertex) = static_cast<const Point&>(vertexBuffer[current_index]);
                 vertices.push_back(current_vertex);
             }
         }

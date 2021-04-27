@@ -17,6 +17,7 @@
 #include "common.h"
 #include "vector.h"
 #include "render.h"
+#include "polygon.h"
 
 using namespace std;
 
@@ -133,36 +134,21 @@ double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) 
 }
 
 void debugPrint() {
-    // Basis standard;
-    // double pitch = 0;
-    // double yaw = 0;
-    // double roll = 0;
-    // Vector i(1, 0, 0);
-    // Vector j(0, 1, 0);
-    // Vector k(0, 0, 1);
-    // standard.apply(translationMatrix(Vector(0, 100, -400)));
-    // Matrix m = eulerRotationMatrix(standard, 147.5, 60.5, 0);
-    // standard.apply(m);
-    // std::cout << "----- \n" << m << "basis form: " << standard << "\n";
-    // m = eulerRotationMatrix(standard, 0, 0.25, 0);
-    // standard.apply(m);
-    // std::cout << "----- \n" << m << "basis form: " << standard << "\n";
-    // m = eulerRotationMatrix(standard, -23.75, -21, 0);
-    // standard.apply(m);
-    // std::cout << "----- \n" << m << "basis form: " << standard << "\n";
-    // //std::cout << eulerRotationMatrix(standard, yaw, pitch, roll);
-    Point p1(-13, 0.13, 0);
-    Point p2(598, -291, 0);
-    Point p3(23, 56, 0);
-    Plane plane(p1, p2, p3);
-    std::cout.precision(12);
-    std::cout << "plane equation: " << plane.A << "x + " << plane.B << "y + " << plane.C << "z + " << plane.D << "= 0 \n";
+    std::vector<Point> vertexBuffer = {
+        Point(1, 20, 10),
+        Point(30, 40, 30),
+        Point(200, 30, 20)
+    };
 
+    Polygon poly(vertexBuffer, {
+        0, 1, 2
+    });
+    std::cout << poly;
 }
 
 int main() {
-    // debugPrint();
-    // return 0;
+    debugPrint();
+    return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());

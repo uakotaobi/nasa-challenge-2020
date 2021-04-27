@@ -15,7 +15,7 @@ std::optional<Polygon> Polygon::clip(Plane clipPlane) const {
     Polygon clippedPolygon;
     for (auto iter = vertices.begin(); iter != vertices.end(); iter++) {
         Vertex p = *iter;
-        Vertex q; 
+        Vertex q;
         if (iter + 1 == vertices.end()) {
             // Iter is on the final vertex.
             q = *vertices.begin();
@@ -23,7 +23,7 @@ std::optional<Polygon> Polygon::clip(Plane clipPlane) const {
             // Iter is not on the final vertex.
             q = *(iter + 1);
         }
-       
+
         // Test if there is an intersection between line segment pq and clipPlane.
         optional<Point> p_intersection = clipPlane.pointOfIntersection(p, q);
         Vertex intersection;
@@ -55,14 +55,33 @@ std::optional<Polygon> Polygon::clip(Plane clipPlane) const {
 };
 
 ostream& operator<<(ostream& out, const Polygon& polygon) {
+    // Calculate length of longest point when it is printed
     int maxSize = 0;
+    vector<string> pointStrings;
     for (auto vertex : polygon.vertices) {
         stringstream ss;
         ss << vertex;
+        pointStrings.push_back(ss.str());
         if (ss.str().size() > maxSize) {
             maxSize = ss.str().size();
         }
     }
 
-
+    for (int i = 0; i < polygon.vertices.size(); i++) {
+        char fun = i + 'A';
+        string z;
+        if (i == 0) {
+            z = "Polygon:\t";
+        } else {
+            z = "        \t";
+        }
+        out << z << fun << ":\t";
+        out.width(maxSize);
+        out << pointStrings[i] << " | " << "Color: {"
+            << (int)polygon.vertices[i].color.r << ", "
+            << (int)polygon.vertices[i].color.g << ", "
+            << (int)polygon.vertices[i].color.b << ", "
+            << (int)polygon.vertices[i].color.a << "} \n";
+    }
+    return out;
 }
