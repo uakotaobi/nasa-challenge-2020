@@ -143,6 +143,7 @@ void debugPrint() {
     Polygon poly(vertexBuffer, {
         0, 1, 2
     });
+    poly.vertices[1].color = SDL_Color {255, 255, 255, 255};
     std::cout << poly;
 }
 

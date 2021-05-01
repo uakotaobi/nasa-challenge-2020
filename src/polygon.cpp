@@ -1,4 +1,5 @@
 #include "polygon.h"
+#include "common.h"
 #include <algorithm>
 #include <sstream>
 
@@ -54,6 +55,7 @@ std::optional<Polygon> Polygon::clip(Plane clipPlane) const {
     }
 };
 
+// Prints a polygon to an output stream.
 ostream& operator<<(ostream& out, const Polygon& polygon) {
     // Calculate length of longest point when it is printed
     int maxSize = 0;
@@ -68,20 +70,17 @@ ostream& operator<<(ostream& out, const Polygon& polygon) {
     }
 
     for (int i = 0; i < polygon.vertices.size(); i++) {
-        char fun = i + 'A';
-        string z;
+        char letter = i + 'A';
+        string prefix;
         if (i == 0) {
-            z = "Polygon:\t";
+            prefix = "Polygon:\t";
         } else {
-            z = "        \t";
+            prefix = "        \t";
         }
-        out << z << fun << ":\t";
+        out << prefix << letter << ":\t";
         out.width(maxSize);
-        out << pointStrings[i] << " | " << "Color: {"
-            << (int)polygon.vertices[i].color.r << ", "
-            << (int)polygon.vertices[i].color.g << ", "
-            << (int)polygon.vertices[i].color.b << ", "
-            << (int)polygon.vertices[i].color.a << "} \n";
+        out << pointStrings[i] << " | " << "Color: "
+            << polygon.vertices[i].color << "\n";
     }
     return out;
 }
