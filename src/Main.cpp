@@ -135,16 +135,28 @@ double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) 
 
 void debugPrint() {
     std::vector<Point> vertexBuffer = {
-        Point(1, 20, 10),
-        Point(30, 40, 30),
-        Point(200, 30, 20)
+        Point(3, 3, 0),
+        Point(7, 0, 0),
+        Point(8.5, 1, 0),
+        Point(7, 3, 0),
+        Point(10, 2, 0),
+        Point(11, 3, 0),
+        Point(7, 7, 0)
     };
 
     Polygon poly(vertexBuffer, {
-        0, 1, 2
+        0, 1, 2, 3, 4, 5, 6
     });
     poly.vertices[1].color = SDL_Color {255, 255, 255, 255};
     std::cout << poly;
+    
+    Plane p(-1, 0, 0, 8);  
+    std::optional<Polygon> foo = poly.clip(p);
+    
+    if (foo) {
+        // If control makes it here, then some parts of the polygon are here.
+        std::cout << *foo;
+    }
 }
 
 int main() {

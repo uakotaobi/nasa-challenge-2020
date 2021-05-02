@@ -17,10 +17,12 @@ struct Plane {
     double D;
 
     Plane();
-    Plane(double A_, double B_, double C_, double D_);
     Plane(Point center, Vector normal);
     Plane(Point a, Point b, Point c);
-
+    
+    // Define the plane Ax + By + Cz + D = 0 using the coefficients A, B, C, and D. 
+    Plane(double A_, double B_, double C_, double D_);
+    
     // Normal is always perpendicular to the plane
     Vector normalVector() const;
 
