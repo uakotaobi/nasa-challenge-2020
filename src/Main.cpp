@@ -36,9 +36,12 @@ Vector detectCollision(Basis camera, Vector velocity, const Grid& grid,
     Point correctedLocation = camera.center;
     Vector correctedVector = velocity;
 
-
-
     for (Plane p : planes) {
+        //   _.-'"\
+        //  /\     \
+        // /  \_.-'/
+        // \  /   /
+        //  \/_.-"
         double distanceFromPlane = p.distance(correctedLocation);
         if (distanceFromPlane > 0) {
             // Force correctedLocation to be inbounds for this plane.
@@ -149,10 +152,10 @@ void debugPrint() {
     });
     poly.vertices[1].color = SDL_Color {255, 255, 255, 255};
     std::cout << poly;
-    
-    Plane p(-1, 0, 0, 8);  
+
+    Plane p(-1, 0, 0, 8);
     std::optional<Polygon> foo = poly.clip(p);
-    
+
     if (foo) {
         // If control makes it here, then some parts of the polygon are here.
         std::cout << *foo;
@@ -160,8 +163,8 @@ void debugPrint() {
 }
 
 int main() {
-    debugPrint();
-    return 0;
+    // debugPrint();
+    // return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());

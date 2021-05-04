@@ -4,6 +4,7 @@
 #include "matrix.h"
 #include "render.h"
 
+
 GridPoint::GridPoint() : Point(0, 0, 0), color(SDL_Color{255, 255, 255, 255}), temperatureKelvin(0), slopeDeg(0), height(0) {}
 GridPoint::GridPoint(Point p, SDL_Color color_, double temperatureKelvin_, double slopeDeg_, double height_)
     : Point(p), color(color_), temperatureKelvin(temperatureKelvin_), slopeDeg(slopeDeg_), height(height_) {}
@@ -187,7 +188,7 @@ Point Grid::findFloor(double u, double v) const {
     Point lower = ll + s_bottom * (lr - ll);
 
     Point resultPoint = upper + r * (lower - upper);
-    
+
 
     return resultPoint;
 
@@ -196,7 +197,24 @@ Point Grid::findFloor(double u, double v) const {
 void Grid::apply(const Matrix& transformationMatrix) {
     // Change the basis.
     system_.apply(transformationMatrix);
-    
+
     // Change the lattice points.
     setLatticePoints();
+}
+
+std::vector<Polygon> Grid::facetize(Point camera, bool doBackFaceCulling) const {
+    std::vector<Polygon> bag;
+    for (int row = 0; row <= rows_ - 1; row++) {
+        for (int column = 0; column <= columns_ - 1; column++) {
+            int ul_index = column + (columns_ + 1) * row;
+            int ur_index = 1 + ul_index;
+            int ll_index = column + (columns_ + 1) * (row + 1);
+            int lr_index = 1 + ll_index;
+            Polygon triangleA = Polygon(lattice, {ul_index, ur_index, ll_index});
+            bag.push_back(triangleA);
+            Polygon triangleB = Polygon(lattice, {lr_index, ur_index, ll_index});
+            bag.push_back(triangleB);
+        }
+    }
+    return bag;
 }

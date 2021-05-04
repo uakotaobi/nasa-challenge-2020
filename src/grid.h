@@ -11,6 +11,7 @@
 #include "basis.h"
 #include "plane.h"
 #include "render.h"
+#include "polygon.h"
 
 struct GridPoint : public Point {
     // We don't need elevation variable, we have this->y
@@ -34,7 +35,7 @@ class Grid {
         // - cellSize: the space between grid cells according to the grid's own basis
         Grid(int rows, int columns, double cellSize = 1.0 );
 
-        // This is for representing a position in the grid using a sum of multiples of the three axes. 
+        // This is for representing a position in the grid using a sum of multiples of the three axes.
         Basis system() const;
 
         // Gets the number of divisions of the grid in the system.axisZ direction.
@@ -96,10 +97,13 @@ class Grid {
         // 0 <= v <= 1
         // 0 <= u <= 1
         Point findFloor(double u, double v) const;
-        
+
         // Applies matrix to the entire grid
         void apply(const Matrix& transformationMatrix);
-        
+
+        // Takes in vertices and spits out triangles.
+        std::vector<Polygon> facetize(Point camera, bool doBackFaceCulling) const;
+
     private:
         std::vector<GridPoint> lattice;
         Basis system_;
@@ -107,7 +111,7 @@ class Grid {
         double cellSize_;
         void setLatticePoints();
 
-    
+
 
 };
 

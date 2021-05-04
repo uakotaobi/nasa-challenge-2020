@@ -21,6 +21,8 @@ struct Polygon {
     public:
         Polygon();
 
+        // First argument is list of vertices.
+        // Second argument is list of indices derived from the vertices, which will form the triangles.
         template <typename V>
         Polygon(const std::vector<V>& vertexBuffer, std::initializer_list<int> indices) {
             for (auto iter = indices.begin(); iter != indices.end(); iter++) {
@@ -30,8 +32,6 @@ struct Polygon {
                 vertices.push_back(current_vertex);
             }
         }
-
-        friend Polygon triangle(Point a, Point b, Point c, SDL_Color x, SDL_Color y, SDL_Color z);
 
         // For backface calling. Flips the polygon's normal vector that is facing the wrong way.
         void flip();
