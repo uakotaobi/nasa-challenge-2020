@@ -137,34 +137,40 @@ double calculateAbsoluteElevation(Vector absoluteAxisY, Vector cameraDirection) 
 }
 
 void debugPrint() {
-    std::vector<Point> vertexBuffer = {
-        Point(3, 3, 0),
-        Point(7, 0, 0),
-        Point(8.5, 1, 0),
-        Point(7, 3, 0),
-        Point(10, 2, 0),
-        Point(11, 3, 0),
-        Point(7, 7, 0)
-    };
+    // std::vector<Point> vertexBuffer = {
+    //     Point(3, 3, 0),
+    //     Point(7, 0, 0),
+    //     Point(8.5, 1, 0),
+    //     Point(7, 3, 0),
+    //     Point(10, 2, 0),
+    //     Point(11, 3, 0),
+    //     Point(7, 7, 0)
+    // };
 
-    Polygon poly(vertexBuffer, {
-        0, 1, 2, 3, 4, 5, 6
-    });
-    poly.vertices[1].color = SDL_Color {255, 255, 255, 255};
-    std::cout << poly;
+    // Polygon poly(vertexBuffer, {
+    //     0, 1, 2, 3, 4, 5, 6
+    // });
+    // poly.vertices[1].color = SDL_Color {255, 255, 255, 255};
+    // std::cout << poly;
 
-    Plane p(-1, 0, 0, 8);
-    std::optional<Polygon> foo = poly.clip(p);
+    // Plane p(-1, 0, 0, 8);
+    // std::optional<Polygon> foo = poly.clip(p);
 
-    if (foo) {
-        // If control makes it here, then some parts of the polygon are here.
-        std::cout << *foo;
+    // if (foo) {
+    //     // If control makes it here, then some parts of the polygon are here.
+    //     std::cout << *foo;
+    // }
+
+    Grid g(2, 2);
+    g.setHeight(1, 1, 100);
+    for (Polygon p : g.facetize(Point(0, 0, 0), false)) {
+        std::cout << p;
     }
 }
 
 int main() {
-    // debugPrint();
-    // return 0;
+    debugPrint();
+    return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());

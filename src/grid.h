@@ -47,6 +47,11 @@ class Grid {
         // Gets the distance between adjacent gridpoints.
         double cellSize() const;
 
+        // A setter that allows you to change the height of mutable grids.
+        void setHeight(int row, int column, double newHeight);
+        // A getter that allows you to get the height of grid points in const grids.
+        double getHeight(int row, int column) const;
+
 
         // Have 3D grid points displayed in 2D
         void render(const Renderer& r) const;
@@ -102,7 +107,7 @@ class Grid {
         void apply(const Matrix& transformationMatrix);
 
         // Takes in vertices and spits out triangles.
-        std::vector<Polygon> facetize(Point camera, bool doBackFaceCulling) const;
+        std::vector<Polygon> facetize(Point cameraCenter, bool doBackFaceCulling) const;
 
     private:
         std::vector<GridPoint> lattice;

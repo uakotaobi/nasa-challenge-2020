@@ -218,3 +218,14 @@ std::vector<Polygon> Grid::facetize(Point camera, bool doBackFaceCulling) const 
     }
     return bag;
 }
+
+void Grid::setHeight(int row, int column, double newHeight) {
+    int index = column + columns_ * row;
+    lattice.at(index).height = newHeight;
+    setLatticePoints();
+}
+
+double Grid::getHeight(int row, int column) const {
+    int index = column + columns_ * row;
+    return lattice.at(index).height;
+}
