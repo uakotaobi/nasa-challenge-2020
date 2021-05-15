@@ -42,6 +42,23 @@ class Renderer {
                 pixels[offset] = SDL_MapRGBA(canvas->format, color.r, color.g, color.b, color.a);
             }
         }
+
+        template <typename PolygonIterator>
+        void renderPolygon(PolygonIterator begin, PolygonIterator end) const {
+            // For each polygon:
+            for (PolygonIterator iter = begin; iter != end; ++iter) {
+                Polygon& poly = *iter;
+                //   Convert every vertex from world space to camera space.
+                //   Clip the polygon against the plane z = 0.
+                //   If the polygon is clipped away, then skip.
+                //   Project the polygon into viewport space.
+                //   Clip the polygon against the four viewport planes (top, bottom, left, right).
+                //   If the polygon is clipped away, then skip.
+                //   For each vertex in the polygon:
+                //     Draw a line from each vertex to the next, using the current vertex's color.
+            }
+        }
+
     private:
         const double focalDistance = 60;
 
@@ -54,6 +71,9 @@ class Renderer {
         SDL_Rect screenRect;
         Matrix projectionMatrix;
         uint32_t* pixels;
+
+        // Draws a line from (x1, y1) to (x2, y2) in the given color.
+        void drawLine(double x1, double y1, double x2, double y2, SDL_Color color) const;
 };
 
 #endif // RENDER_H_INCLUDED

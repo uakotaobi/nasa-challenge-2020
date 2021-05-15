@@ -169,8 +169,8 @@ void debugPrint() {
 }
 
 int main() {
-    debugPrint();
-    return 0;
+    // debugPrint();
+    // return 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
