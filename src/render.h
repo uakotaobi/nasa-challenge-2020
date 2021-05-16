@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "basis.h"
 #include "matrix.h"
+#include "polygon.h"
 
 class Renderer {
     public:
@@ -42,17 +43,52 @@ class Renderer {
                 pixels[offset] = SDL_MapRGBA(canvas->format, color.r, color.g, color.b, color.a);
             }
         }
-
+        
+        // Renders a set of polygons on the screen.
         template <typename PolygonIterator>
         void renderPolygon(PolygonIterator begin, PolygonIterator end) const {
+            
+            Plane nearClipPlane = Plane(0, 0, 1, 0); // z = 0
+            auto viewPortClipPlanes = {
+                Plane(0, 1, 0, -viewPortRect.y),                  // y = viewPortRect.y (top)
+                Plane(1, 0, 0, -viewPortRect.x),                  // x = viewPortRect.x (left)
+                Plane(0, -1, 0, viewPortRect.y + viewPortRect.h), // -y = -viewPortRect.y - viewPortRect.h (bottom)
+                Plane(-1, 0, 0, viewPortRect.x + viewPortRect.w), // -x = -viewPortRect.x - viewPortRect.w (right)
+            };
+            
             // For each polygon:
             for (PolygonIterator iter = begin; iter != end; ++iter) {
                 Polygon& poly = *iter;
+                
+                
                 //   Convert every vertex from world space to camera space.
+                for (Vertex& v : poly.vertices) {
+                    (Point&)v = cameraMatrix * v;
+                }
+                
                 //   Clip the polygon against the plane z = 0.
+                auto clipPoly = poly.clip(nearClipPlane);
+                
                 //   If the polygon is clipped away, then skip.
+                if (clipPoly == std::nullopt) {
+                    continue;
+                }
+                
                 //   Project the polygon into viewport space.
+                for (Vertex& v : clipPoly->vertices) {
+                    (Point&)v = projectionMatrix * v;
+                }
+                
                 //   Clip the polygon against the four viewport planes (top, bottom, left, right).
+                bool clippedAway = false;
+                for (auto viewPortClipPlane : viewPortClipPlanes) {
+                    auto viewPortClipPoly = poly.clip(viewPortClipPlane);
+                    
+                    if (viewPortClipPoly == std::nullopt) {
+                        
+                    }
+                }
+                
                 //   If the polygon is clipped away, then skip.
                 //   For each vertex in the polygon:
                 //     Draw a line from each vertex to the next, using the current vertex's color.
@@ -62,7 +98,7 @@ class Renderer {
     private:
         const double focalDistance = 60;
 
-        // These variabes change from frame to frame.
+        // These variables change from frame to frame.
         SDL_Surface* canvas;
         SDL_Rect viewPortRect;
         Basis camera;
