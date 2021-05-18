@@ -6,6 +6,8 @@
 #include "matrix.h"
 #include "polygon.h"
 
+#include <iostream>
+
 class Renderer {
     public:
         Renderer();
@@ -15,6 +17,9 @@ class Renderer {
 
         // This exposes our internal SDL_Surface so that other people can use it.
         SDL_Surface* getScreen() const;
+
+        // The camera is not exposed in the render so we can get it here.
+        Basis getCamera() const;
 
         template <typename ColorPointIterator>
         void renderPoint(ColorPointIterator begin, ColorPointIterator end) const {
@@ -43,11 +48,12 @@ class Renderer {
                 pixels[offset] = SDL_MapRGBA(canvas->format, color.r, color.g, color.b, color.a);
             }
         }
-        
+
         // Renders a set of polygons on the screen.
         template <typename PolygonIterator>
         void renderPolygon(PolygonIterator begin, PolygonIterator end) const {
-            
+            int counter = 0;
+
             Plane nearClipPlane = Plane(0, 0, 1, 0); // z = 0
             auto viewPortClipPlanes = {
                 Plane(0, 1, 0, -viewPortRect.y),                  // y = viewPortRect.y (top)
@@ -55,44 +61,60 @@ class Renderer {
                 Plane(0, -1, 0, viewPortRect.y + viewPortRect.h), // -y = -viewPortRect.y - viewPortRect.h (bottom)
                 Plane(-1, 0, 0, viewPortRect.x + viewPortRect.w), // -x = -viewPortRect.x - viewPortRect.w (right)
             };
-            
+
             // For each polygon:
             for (PolygonIterator iter = begin; iter != end; ++iter) {
                 Polygon& poly = *iter;
-                
-                
+
                 //   Convert every vertex from world space to camera space.
                 for (Vertex& v : poly.vertices) {
                     (Point&)v = cameraMatrix * v;
                 }
-                
+
                 //   Clip the polygon against the plane z = 0.
                 auto clipPoly = poly.clip(nearClipPlane);
-                
+
                 //   If the polygon is clipped away, then skip.
                 if (clipPoly == std::nullopt) {
                     continue;
                 }
-                
+
                 //   Project the polygon into viewport space.
                 for (Vertex& v : clipPoly->vertices) {
                     (Point&)v = projectionMatrix * v;
                 }
-                
+
                 //   Clip the polygon against the four viewport planes (top, bottom, left, right).
                 bool clippedAway = false;
                 for (auto viewPortClipPlane : viewPortClipPlanes) {
                     auto viewPortClipPoly = poly.clip(viewPortClipPlane);
-                    
+
                     if (viewPortClipPoly == std::nullopt) {
-                        
+                        clippedAway = true;
+                        break;
                     }
+                    poly = *viewPortClipPoly;
                 }
-                
+
                 //   If the polygon is clipped away, then skip.
+                if (clippedAway == true) {
+                    continue;
+                }
                 //   For each vertex in the polygon:
-                //     Draw a line from each vertex to the next, using the current vertex's color.
-            }
+                for (int i = 0; i < poly.vertices.size(); i++) {
+                    //     Draw a line from each vertex to the next, using the current vertex's color.
+                    Vertex currentVertex = poly.vertices[i];
+                    Vertex nextVertex;
+                    if (i != poly.vertices.size() - 1) {
+                        nextVertex = poly.vertices[i + 1];
+                    } else {
+                        nextVertex = poly.vertices[0];
+                    }
+                    drawLine(currentVertex.x, currentVertex.y, nextVertex.x, nextVertex.y, currentVertex.color);
+                }
+                counter = counter + 1;
+            } // End (for each polygon)
+            std::cout << counter << "\n";
         }
 
     private:

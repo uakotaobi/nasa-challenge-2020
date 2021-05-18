@@ -105,7 +105,9 @@ Plane Grid::backPlane() const {
 }
 
 void Grid::render(const Renderer& r) const {
-    r.renderPoint(lattice.begin(), lattice.end());
+    // r.renderPoint(lattice.begin(), lattice.end());
+    auto bag = facetize(r.getCamera().center, false);
+    r.renderPolygon(bag.begin(), bag.end());
 }
 
 std::tuple<double, double, double> Grid::gridLocation(Point p) const {

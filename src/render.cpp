@@ -35,6 +35,10 @@ SDL_Surface* Renderer::getScreen() const{
     return canvas;
 }
 
+Basis Renderer::getCamera() const{
+    return camera;
+}
+
 void Renderer::drawLine(double x1, double y1, double x2, double y2, SDL_Color color) const {
     double x = x1;
     double y = y1;
