@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <chrono>
 
 #include "SDL.h"
 #include "button_view.h"
@@ -171,6 +172,10 @@ void debugPrint() {
 int main() {
     // debugPrint();
     // return 0;
+
+
+    double averageFps = 0;
+    auto previousTime = chrono::system_clock::now();
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
@@ -460,6 +465,17 @@ int main() {
                 break;
             } */
         }
+
+
+        auto currentTime = chrono::system_clock::now();
+        const auto measurementInterval = chrono::milliseconds(250);
+        if (currentTime - previousTime > measurementInterval) {
+            // Calculate new FPS
+
+
+            previousTime = currentTime;
+        }
+
         SDL_Delay(1000/framesPerSecond);
     }
 
