@@ -114,7 +114,7 @@ class Renderer {
                 }
                 counter = counter + 1;
             } // End (for each polygon)
-            std::cout << counter << "\n";
+            // std::cout << counter << "\n";
         }
 
     private:

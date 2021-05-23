@@ -176,6 +176,7 @@ int main() {
 
     double averageFps = 0;
     auto previousTime = chrono::system_clock::now();
+    int frameCount = 0; 
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
@@ -457,6 +458,7 @@ int main() {
 
             SDL_RenderCopy(renderer, texture, nullptr, nullptr);
             SDL_RenderPresent(renderer);
+            frameCount += 1;
             SDL_DestroyTexture(texture);
 
             /* // Warning: temporary!
@@ -466,13 +468,15 @@ int main() {
             } */
         }
 
-
+        // Measure framerate. 
         auto currentTime = chrono::system_clock::now();
         const auto measurementInterval = chrono::milliseconds(250);
         if (currentTime - previousTime > measurementInterval) {
             // Calculate new FPS
-
-
+            averageFps = frameCount / (measurementInterval.count() / 1000.0);
+            cout << "average Frames Per Second: " << averageFps << "\n";
+            
+            frameCount = 0;
             previousTime = currentTime;
         }
 
