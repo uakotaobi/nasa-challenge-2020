@@ -5,19 +5,20 @@
 
 class FrameRateView {
     public:
-        // Construct a frame rate view that will be 
+        // Construct a frame rate view that will be
         // displayed in the corner of a parent view.
         FrameRateView(const View& parentView_);
         ~FrameRateView();
 
         void draw(SDL_Surface* screen);
         SDL_Rect boundary() const;
-        
+
         // Tells the FrameRateView to update the view with the average fps.
         void updateFps(double averageFps);
 
     private:
         const View& parentView;
+        // Stores a drawing of the last framerate that was passed into update fps 
         SDL_Surface* fpsTextSurface;
 };
 
