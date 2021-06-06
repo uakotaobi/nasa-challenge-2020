@@ -230,6 +230,7 @@ int main() {
     MenuView menuView(surf, currentView);
     MainView mainView(surf);
 
+
     // Kinematic variables
     const double accelerationRate = 2;                              // units/frame
     const double angularAccelerationRate = 1 / timeFactor;          // degrees/frame
@@ -474,7 +475,7 @@ int main() {
         if (currentTime - previousTime > measurementInterval) {
             // Calculate new FPS
             averageFps = frameCount / (measurementInterval.count() / 1000.0);
-            cout << "average Frames Per Second: " << averageFps << "\n";
+            mainView.updateFps(averageFps);
             
             frameCount = 0;
             previousTime = currentTime;

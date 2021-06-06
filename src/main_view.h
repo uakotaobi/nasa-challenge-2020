@@ -6,6 +6,7 @@
 #include "info_view.h"
 #include "nav_view.h"
 #include "render.h"
+#include "fps_view.h"
 
 class MainView : public View {
     public:
@@ -18,12 +19,14 @@ class MainView : public View {
         void setCamera(const Basis& newCamera);
         Basis getCamera() const;
         Grid& getGrid();
+        void updateFps(double averageFps);
     private:
         SDL_Rect boundaryMainView;
         MoonView moonView;
         InfoView infoView;
 		NavView navView;
         Basis camera;
+        FrameRateView frameRateView;
 };
 
 
