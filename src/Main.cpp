@@ -164,7 +164,7 @@ void debugPrint() {
 
     Grid g(2, 2);
     g.setHeight(1, 1, 100);
-    for (Polygon p : g.facetize(Point(0, 0, 0), false)) {
+    for (Polygon p : g.facetize()) {
         std::cout << p;
     }
 }
@@ -176,7 +176,7 @@ int main() {
 
     double averageFps = 0;
     auto previousTime = chrono::system_clock::now();
-    int frameCount = 0; 
+    int frameCount = 0;
 
     if (TTF_Init() == -1) {
         printf("TTF_Init: %s\n", TTF_GetError());
@@ -469,14 +469,14 @@ int main() {
             } */
         }
 
-        // Measure framerate. 
+        // Measure framerate.
         auto currentTime = chrono::system_clock::now();
-        const auto measurementInterval = chrono::milliseconds(250);
+        const auto measurementInterval = chrono::milliseconds(1000);
         if (currentTime - previousTime > measurementInterval) {
             // Calculate new FPS
             averageFps = frameCount / (measurementInterval.count() / 1000.0);
             mainView.updateFps(averageFps);
-            
+
             frameCount = 0;
             previousTime = currentTime;
         }
