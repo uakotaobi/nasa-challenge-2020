@@ -2,6 +2,10 @@ PROJECT(altitution CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 SET(CMAKE_CXX_STANDARD 17)
 
+# Temporary compiler flags for performance analysis
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 # For Cygwin environments only: helps find_package to locate Cygwin's SDL2 libraries.
 IF(CYGWIN)
     SET(SDL2_TTF_LIBRARY "c:/tools/cygwin/lib/libSDL2_ttf.dll.a")
