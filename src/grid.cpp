@@ -41,23 +41,24 @@ void Grid::setLatticePoints() {
             gridPoint.z = actualLocation.z;
         }
     }
+    triangles = facetize();
 }
 
 void Grid::setHeightByFunction(std::function<double(double,double)> zCoordinateFunc,
                                std::function<SDL_Color(double, double)> colorFunc) {
     // zCoordinateFunc takes normalized coordinates
-    setLatticePoints();
     int index = 0;
     for (double y = 0; y <= 1; y += 1.0/(rows_)) {
         for (double x = 0; x <= 1; x += 1.0/(columns_)) {
             double z = zCoordinateFunc(x, y);
             SDL_Color a = colorFunc(x, y);
             GridPoint& gridPoint = lattice.at(index);
-            gridPoint.y = z;
+            gridPoint.height = z;
             gridPoint.color = a;
             index++;
         }
     }
+    setLatticePoints();
 }
 
 Basis Grid::system() const {
@@ -106,8 +107,8 @@ Plane Grid::backPlane() const {
 
 void Grid::render(const Renderer& r) const {
     // r.renderPoint(lattice.begin(), lattice.end());
-    auto bag = facetize(r.getCamera().center, false);
-    r.renderPolygon(bag.begin(), bag.end());
+
+    r.renderPolygon(triangles.begin(), triangles.end());
 }
 
 std::tuple<double, double, double> Grid::gridLocation(Point p) const {
@@ -204,7 +205,7 @@ void Grid::apply(const Matrix& transformationMatrix) {
     setLatticePoints();
 }
 
-std::vector<Polygon> Grid::facetize(Point camera, bool doBackFaceCulling) const {
+std::vector<Polygon> Grid::facetize() const {
     std::vector<Polygon> bag;
     for (int row = 0; row <= rows_ - 1; row++) {
         for (int column = 0; column <= columns_ - 1; column++) {

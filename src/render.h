@@ -64,7 +64,7 @@ class Renderer {
 
             // For each polygon:
             for (PolygonIterator iter = begin; iter != end; ++iter) {
-                Polygon& poly = *iter;
+                Polygon poly = *iter;
 
                 //   Convert every vertex from world space to camera space.
                 for (Vertex& v : poly.vertices) {

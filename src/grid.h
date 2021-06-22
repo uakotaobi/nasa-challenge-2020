@@ -107,13 +107,14 @@ class Grid {
         void apply(const Matrix& transformationMatrix);
 
         // Takes in vertices and spits out triangles.
-        std::vector<Polygon> facetize(Point cameraCenter, bool doBackFaceCulling) const;
+        std::vector<Polygon> facetize() const;
 
     private:
         std::vector<GridPoint> lattice;
         Basis system_;
         int rows_, columns_;
         double cellSize_;
+        std::vector<Polygon> triangles;
         void setLatticePoints();
 
 
