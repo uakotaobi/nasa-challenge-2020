@@ -61,10 +61,11 @@ std::ostream& operator<<(std::ostream& s, Matrix m) {
 
 Vector operator*(Matrix m, Vector v) {
     // 0 at end because vectors can't be translated, they don't have a location, just a direction
-    double x = m.data[0] * v.x + m.data[1] * v.y + m.data[2] * v.z + m.data[3] * 0;
-    double y = m.data[4] * v.x + m.data[5] * v.y + m.data[6] * v.z + m.data[7] * 0;
-    double z = m.data[8] * v.x + m.data[9] * v.y + m.data[10] * v.z + m.data[11] * 0;
-    double w = m.data[12] * v.x + m.data[13] * v.y  + m.data[14] * v.z + m.data[15] * 0;
+    const double* const dataPointer = &m.data[0];
+    double y = dataPointer[4] * v.x + dataPointer[5] * v.y + dataPointer[6] * v.z + dataPointer[7] * 0;
+    double x = dataPointer[0] * v.x + dataPointer[1] * v.y + dataPointer[2] * v.z + dataPointer[3] * 0;
+    double z = dataPointer[8] * v.x + dataPointer[9] * v.y + dataPointer[10] * v.z + dataPointer[11] * 0;
+    double w = dataPointer[12] * v.x + dataPointer[13] * v.y  + dataPointer[14] * v.z + dataPointer[15] * 0;
     if (abs(w) >= epsilon) {
         x /= w;
         y /= w;
@@ -75,10 +76,11 @@ Vector operator*(Matrix m, Vector v) {
 }
 
 Point operator*(Matrix m, Point p) {
-    double x = m.data[0] * p.x + m.data[1] * p.y + m.data[2] * p.z + m.data[3] * 1;
-    double y = m.data[4] * p.x + m.data[5] * p.y + m.data[6] * p.z + m.data[7] * 1;
-    double z = m.data[8] * p.x + m.data[9] * p.y + m.data[10] * p.z + m.data[11] * 1;
-    double w = m.data[12] * p.x + m.data[13] * p.y  + m.data[14] * p.z + m.data[15] * 1;
+    const double* const dataPointer = &m.data[0];
+    double x = dataPointer[0] * p.x + dataPointer[1] * p.y + dataPointer[2] * p.z + dataPointer[3] * 1;
+    double y = dataPointer[4] * p.x + dataPointer[5] * p.y + dataPointer[6] * p.z + dataPointer[7] * 1;
+    double z = dataPointer[8] * p.x + dataPointer[9] * p.y + dataPointer[10] * p.z + dataPointer[11] * 1;
+    double w = dataPointer[12] * p.x + dataPointer[13] * p.y  + dataPointer[14] * p.z + dataPointer[15] * 1;
     if (abs(w) >= epsilon) {
         x /= w;
         y /= w;

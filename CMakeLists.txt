@@ -3,7 +3,20 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 SET(CMAKE_CXX_STANDARD 17)
 
 # Temporary compiler flags for performance analysis
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+# In order to compile in debug mode:
+#
+#   cmake -D CMAKE_BUILD_TYPE=debug ..
+#
+# In order to compile in release mode:
+#
+#   cmake -D CMAKE_BUILD_TYPE=release ..
+#
+# In debug mode, running this program will produce a file called gmod.out in the
+# current directory (the build in this case). You can analyze this with gprof: 
+# 
+#   gprof ./altitution-bin --graph | less
+
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # For Cygwin environments only: helps find_package to locate Cygwin's SDL2 libraries.
