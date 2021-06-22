@@ -106,9 +106,9 @@ Plane Grid::backPlane() const {
 }
 
 void Grid::render(const Renderer& r) const {
-    // r.renderPoint(lattice.begin(), lattice.end());
+    r.renderPoint(lattice.begin(), lattice.end());
 
-    r.renderPolygon(triangles.begin(), triangles.end());
+    // r.renderPolygon(triangles.begin(), triangles.end());
 }
 
 std::tuple<double, double, double> Grid::gridLocation(Point p) const {

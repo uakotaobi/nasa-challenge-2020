@@ -103,14 +103,18 @@ class Renderer {
                 //   For each vertex in the polygon:
                 for (int i = 0; i < poly.vertices.size(); i++) {
                     //     Draw a line from each vertex to the next, using the current vertex's color.
-                    Vertex currentVertex = poly.vertices[i];
-                    Vertex nextVertex;
+                    int currentVertex = i;
+                    int nextVertex;
                     if (i != poly.vertices.size() - 1) {
-                        nextVertex = poly.vertices[i + 1];
+                        nextVertex = i + 1;
                     } else {
-                        nextVertex = poly.vertices[0];
+                        nextVertex = 0;
                     }
-                    drawLine(currentVertex.x, currentVertex.y, nextVertex.x, nextVertex.y, currentVertex.color);
+                    drawLine(poly.vertices[currentVertex].x,
+                             poly.vertices[currentVertex].y,
+                             poly.vertices[nextVertex].x,
+                             poly.vertices[nextVertex].y,
+                             poly.vertices[currentVertex].color);
                 }
                 counter = counter + 1;
             } // End (for each polygon)
