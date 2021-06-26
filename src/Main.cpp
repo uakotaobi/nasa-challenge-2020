@@ -367,15 +367,15 @@ int main() {
 
         if (pressedKeys[SDLK_SPACE]) {
             if (currentView == 1) {
-                const double boosterPower = 1.50;
-                const double maxVerticalSpeed = 5 / framesPerSecond; // units per Second
+                const double boosterPower = 4;
+                const double maxVerticalSpeed = 30 * gravitationalAcceleration; // units per Second
                 const Vector up = normalize(mainView.getGrid().system().axisY);
                 bool boostingAllowed = true;
 
                 if (verticalMotion.magnitude() > maxVerticalSpeed) {
                     double cosTheta = dotProduct(normalize(verticalMotion), up);
-                    if (cosTheta >= 0 && cosTheta < 1) {
-                        // Going too fast, booster is not gonna turn on.
+                    if (cosTheta > 0 && cosTheta <= 1) {
+                        // Going too fast in an upward direction, booster is not gonna turn on.
                         boostingAllowed = false;
                     }
                 }
